@@ -10,12 +10,12 @@
 using System;
 using System.Reflection;
 
-[assembly: System.Reflection.AssemblyCompanyAttribute("TesorosChoco.Application")]
+[assembly: System.Reflection.AssemblyCompanyAttribute("TesorosChoco.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+403cc7edafe23b4ed5f6c2b198658acb058dab27")]
-[assembly: System.Reflection.AssemblyProductAttribute("TesorosChoco.Application")]
-[assembly: System.Reflection.AssemblyTitleAttribute("TesorosChoco.Application")]
+[assembly: System.Reflection.AssemblyProductAttribute("TesorosChoco.Infrastructure")]
+[assembly: System.Reflection.AssemblyTitleAttribute("TesorosChoco.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
 
 // Generado por la clase WriteCodeFragment de MSBuild.
