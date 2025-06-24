@@ -50,8 +50,7 @@ public class RefreshTokenService : IRefreshTokenService
     public Task<bool> ValidateRefreshTokenAsync(int userId, string refreshToken)
     {
         var cacheKey = $"{CACHE_KEY_PREFIX}{userId}_{refreshToken}";
-        
-        if (!_cache.TryGetValue(cacheKey, out RefreshTokenData? tokenData))
+          if (!_cache.TryGetValue(cacheKey, out RefreshTokenData? tokenData) || tokenData == null)
         {
             _logger.LogWarning("Refresh token not found for user {UserId}", userId);
             return Task.FromResult(false);
@@ -65,13 +64,11 @@ public class RefreshTokenService : IRefreshTokenService
         }
 
         return Task.FromResult(true);
-    }
-
-    public Task RevokeRefreshTokenAsync(int userId, string refreshToken)
+    }    public Task RevokeRefreshTokenAsync(int userId, string refreshToken)
     {
         var cacheKey = $"{CACHE_KEY_PREFIX}{userId}_{refreshToken}";
         
-        if (_cache.TryGetValue(cacheKey, out RefreshTokenData? tokenData))
+        if (_cache.TryGetValue(cacheKey, out RefreshTokenData? tokenData) && tokenData != null)
         {
             tokenData.IsRevoked = true;
             _cache.Set(cacheKey, tokenData, TimeSpan.FromMinutes(5)); // Keep for a short time to prevent reuse

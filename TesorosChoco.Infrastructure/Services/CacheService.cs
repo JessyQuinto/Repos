@@ -91,9 +91,7 @@ public class CacheService : ICacheService
         {
             _logger.LogError(ex, "Error removing cached value for key: {Key}", key);
         }
-    }
-
-    public async Task RemoveByPatternAsync(string pattern, CancellationToken cancellationToken = default)
+    }    public Task RemoveByPatternAsync(string pattern, CancellationToken cancellationToken = default)
     {
         // Note: This is a simplified implementation. For Redis, you'd use SCAN with pattern matching
         // For MemoryCache, this would require tracking keys separately
@@ -101,10 +99,12 @@ public class CacheService : ICacheService
         {
             _logger.LogWarning("RemoveByPatternAsync is not fully implemented for this cache provider. Pattern: {Pattern}", pattern);
             // Implementation would depend on the cache provider (Redis, SQL Server, etc.)
+            return Task.CompletedTask;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error removing cached values by pattern: {Pattern}", pattern);
+            return Task.FromException(ex);
         }
     }
 

@@ -1,0 +1,13 @@
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Domain\bin\Release\net9.0\TesorosChoco.Domain.deps.json
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Domain\bin\Release\net9.0\TesorosChoco.Domain.dll
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Domain\bin\Release\net9.0\TesorosChoco.Domain.pdb
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Domain\obj\Release\net9.0\TesorosChoco.Domain.csproj.AssemblyReference.cache
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Domain\obj\Release\net9.0\TesorosChoco.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Domain\obj\Release\net9.0\TesorosChoco.Domain.AssemblyInfoInputs.cache
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Domain\obj\Release\net9.0\TesorosChoco.Domain.AssemblyInfo.cs
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Domain\obj\Release\net9.0\TesorosChoco.Domain.csproj.CoreCompileInputs.cache
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Domain\obj\Release\net9.0\TesorosChoco.Domain.sourcelink.json
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Domain\obj\Release\net9.0\TesorosChoco.Domain.dll
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Domain\obj\Release\net9.0\refint\TesorosChoco.Domain.dll
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Domain\obj\Release\net9.0\TesorosChoco.Domain.pdb
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Domain\obj\Release\net9.0\ref\TesorosChoco.Domain.dll

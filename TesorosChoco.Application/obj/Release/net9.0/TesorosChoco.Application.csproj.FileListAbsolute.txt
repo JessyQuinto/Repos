@@ -1,0 +1,16 @@
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Application\bin\Release\net9.0\TesorosChoco.Application.deps.json
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Application\bin\Release\net9.0\TesorosChoco.Application.dll
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Application\bin\Release\net9.0\TesorosChoco.Application.pdb
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Application\bin\Release\net9.0\TesorosChoco.Domain.dll
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Application\bin\Release\net9.0\TesorosChoco.Domain.pdb
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Application\obj\Release\net9.0\TesorosChoco.Application.csproj.AssemblyReference.cache
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Application\obj\Release\net9.0\TesorosChoco.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Application\obj\Release\net9.0\TesorosChoco.Application.AssemblyInfoInputs.cache
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Application\obj\Release\net9.0\TesorosChoco.Application.AssemblyInfo.cs
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Application\obj\Release\net9.0\TesorosChoco.Application.csproj.CoreCompileInputs.cache
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Application\obj\Release\net9.0\TesorosChoco.Application.sourcelink.json
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Application\obj\Release\net9.0\TesorosC.0B915ACE.Up2Date
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Application\obj\Release\net9.0\TesorosChoco.Application.dll
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Application\obj\Release\net9.0\refint\TesorosChoco.Application.dll
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Application\obj\Release\net9.0\TesorosChoco.Application.pdb
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Application\obj\Release\net9.0\ref\TesorosChoco.Application.dll
