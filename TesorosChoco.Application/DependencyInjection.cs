@@ -22,9 +22,7 @@ public static class DependencyInjection
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 
         // FluentValidation
-        services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-
-        // Application Services
+        services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());        // Application Services
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IProductService, ProductService>();

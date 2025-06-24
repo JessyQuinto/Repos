@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TesorosChoco.Application")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4714558c849ed85ade2efdfec9b9ec6bf3624809")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f4c5c9786c282142a06278471ccc54c3efaf699f")]
 [assembly: System.Reflection.AssemblyProductAttribute("TesorosChoco.Application")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TesorosChoco.Application")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

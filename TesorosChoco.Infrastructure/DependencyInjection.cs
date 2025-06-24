@@ -116,10 +116,10 @@ public static class DependencyInjection
             {
                 options.Configuration = connectionString;
             }
-        });
-
-        // Infrastructure Services
+        });        // Infrastructure Services
         services.AddScoped<IJwtTokenService, JwtTokenService>();
+        services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<IRefreshTokenService, RefreshTokenService>();
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<ICacheService, CacheService>();        // Repository Registration

@@ -25,3 +25,12 @@ public interface IPasswordService
     string HashPassword(string password);
     bool VerifyPassword(string password, string hash);
 }
+
+public interface IRefreshTokenService
+{
+    Task<string> CreateRefreshTokenAsync(int userId);
+    Task<bool> ValidateRefreshTokenAsync(int userId, string refreshToken);
+    Task RevokeRefreshTokenAsync(int userId, string refreshToken);
+    Task RevokeAllRefreshTokensAsync(int userId);
+    Task CleanupExpiredTokensAsync();
+}

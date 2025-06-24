@@ -2,6 +2,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 using TesorosChoco.Infrastructure.Identity;
+using TesorosChoco.Domain.Interfaces;
 
 namespace TesorosChoco.Infrastructure.Services;
 
@@ -9,15 +10,6 @@ namespace TesorosChoco.Infrastructure.Services;
 /// Service for managing refresh tokens with secure storage and expiration
 /// Implements token rotation for enhanced security
 /// </summary>
-public interface IRefreshTokenService
-{
-    Task<string> CreateRefreshTokenAsync(int userId);
-    Task<bool> ValidateRefreshTokenAsync(int userId, string refreshToken);
-    Task RevokeRefreshTokenAsync(int userId, string refreshToken);
-    Task RevokeAllRefreshTokensAsync(int userId);
-    Task CleanupExpiredTokensAsync();
-}
-
 public class RefreshTokenService : IRefreshTokenService
 {
     private readonly IMemoryCache _cache;
