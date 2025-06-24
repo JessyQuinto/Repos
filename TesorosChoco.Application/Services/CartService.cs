@@ -9,21 +9,22 @@ namespace TesorosChoco.Application.Services;
 
 /// <summary>
 /// Cart service implementation with comprehensive cart management
-/// Handles cart synchronization, item updates, and cart clearing
+/// Handles cart synchronization, item updates, stock reservations, and cart clearing
 /// </summary>
 public class CartService : ICartService
 {
     private readonly ICartRepository _cartRepository;
     private readonly IProductRepository _productRepository;
-    private readonly IMapper _mapper;
-
-    public CartService(
+    private readonly IInventoryService _inventoryService;
+    private readonly IMapper _mapper;    public CartService(
         ICartRepository cartRepository,
         IProductRepository productRepository,
+        IInventoryService inventoryService,
         IMapper mapper)
     {
         _cartRepository = cartRepository ?? throw new ArgumentNullException(nameof(cartRepository));
         _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository));
+        _inventoryService = inventoryService ?? throw new ArgumentNullException(nameof(inventoryService));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
     }
 
@@ -315,8 +316,7 @@ public class CartService : ICartService
             cart.UpdatedAt = DateTime.UtcNow;
 
             var updatedCart = cart.Id == 0 
-                ? await _cartRepository.CreateAsync(cart)
-                : await _cartRepository.UpdateAsync(cart);
+                ? await _cartRepository.CreateAsync(cart)                : await _cartRepository.UpdateAsync(cart);
 
             return _mapper.Map<CartDto>(updatedCart);
         }
@@ -347,6 +347,89 @@ public class CartService : ICartService
         catch (Exception ex)
         {
             throw new InvalidOperationException($"Error removing product {productId} from cart for user {userId}", ex);
+        }
+    }
+
+    /// <summary>
+    /// Reserves stock for all items in user's cart
+    /// Called before proceeding to checkout to ensure stock availability
+    /// </summary>
+    public async Task<bool> ReserveCartStockAsync(int userId, string? sessionId = null)
+    {
+        try
+        {
+            var cart = await _cartRepository.GetByUserIdAsync(userId);
+            if (cart == null || !cart.Items.Any())
+                return true; // No items to reserve
+
+            // Reserve stock for each item
+            foreach (var item in cart.Items)
+            {
+                var success = await _inventoryService.ReserveStockAsync(item.ProductId, userId, item.Quantity, sessionId);
+                if (!success)
+                {
+                    // If any reservation fails, release all previously made reservations
+                    await ReleaseCartReservationsAsync(userId);
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Error reserving stock for cart of user {userId}", ex);
+        }
+    }
+
+    /// <summary>
+    /// Releases all stock reservations for items in user's cart
+    /// Called when user abandons checkout or after order completion
+    /// </summary>
+    public async Task ReleaseCartReservationsAsync(int userId)
+    {
+        try
+        {
+            var cart = await _cartRepository.GetByUserIdAsync(userId);
+            if (cart == null || !cart.Items.Any())
+                return;
+
+            // Release reservations for each item
+            foreach (var item in cart.Items)
+            {
+                await _inventoryService.ReleaseReservationAsync(item.ProductId, userId);
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Error releasing cart reservations for user {userId}", ex);
+        }
+    }
+
+    /// <summary>
+    /// Validates that cart items have sufficient available stock (including reservations)
+    /// Used to check availability before allowing checkout
+    /// </summary>
+    public async Task<bool> ValidateCartStockAsync(int userId)
+    {
+        try
+        {
+            var cart = await _cartRepository.GetByUserIdAsync(userId);
+            if (cart == null || !cart.Items.Any())
+                return true;
+
+            foreach (var item in cart.Items)
+            {
+                var availableStock = await _inventoryService.GetAvailableStockAsync(item.ProductId);
+                if (availableStock < item.Quantity)
+                    return false;
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Error validating cart stock for user {userId}", ex);
         }
     }
 }

@@ -1,3 +1,5 @@
+using TesorosChoco.Domain.Enums;
+
 namespace TesorosChoco.Domain.Entities;
 
 public class Product : BaseEntity
@@ -26,6 +28,8 @@ public class Product : BaseEntity
     
     public double? Rating { get; set; }
     
+    public ProductStatus Status { get; set; } = ProductStatus.Draft;
+    
     // Navigation Properties
     public virtual Category Category { get; set; } = null!;
     
@@ -41,4 +45,8 @@ public class Product : BaseEntity
     public bool HasDiscount => DiscountedPrice.HasValue && DiscountedPrice < Price;
     
     public bool IsInStock => Stock > 0;
+    
+    public bool IsAvailableForPurchase => Status == ProductStatus.Active && IsInStock;
+    
+    public bool IsActive => Status == ProductStatus.Active;
 }

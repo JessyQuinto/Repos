@@ -6,6 +6,7 @@ using TesorosChoco.Application.Interfaces;
 using TesorosChoco.Application.Services;
 using TesorosChoco.Application.Mappings;
 using TesorosChoco.Application.Behaviors;
+using TesorosChoco.Application.Validators;
 
 namespace TesorosChoco.Application;
 
@@ -27,10 +28,11 @@ public static class DependencyInjection
             cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(PerformanceBehavior<,>));
             cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ExceptionHandlingBehavior<,>));
-        });
-
-        // FluentValidation
+        });        // FluentValidation
         services.AddValidatorsFromAssembly(assembly);
+
+        // Business Rules Validators
+        services.AddScoped<CreateOrderBusinessRulesValidator>();
 
         // Application Services (legacy - will be gradually replaced by CQRS)
         services.AddScoped<IAuthService, AuthService>();

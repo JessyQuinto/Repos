@@ -19,6 +19,7 @@ public class TesorosChocoDbContext : DbContext
     public DbSet<CartItem> CartItems { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<StockReservation> StockReservations { get; set; }
     public DbSet<ContactMessage> ContactMessages { get; set; }
     public DbSet<NewsletterSubscription> NewsletterSubscriptions { get; set; }
 
@@ -35,6 +36,7 @@ public class TesorosChocoDbContext : DbContext
         modelBuilder.ApplyConfiguration(new CartItemConfiguration());
         modelBuilder.ApplyConfiguration(new OrderConfiguration());
         modelBuilder.ApplyConfiguration(new OrderItemConfiguration());
+        modelBuilder.ApplyConfiguration(new StockReservationConfiguration());
         modelBuilder.ApplyConfiguration(new ContactMessageConfiguration());
         modelBuilder.ApplyConfiguration(new NewsletterSubscriptionConfiguration());
     }

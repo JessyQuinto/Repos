@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TesorosChoco.Application.DTOs;
 using TesorosChoco.Application.DTOs.Requests;
 using TesorosChoco.Application.Interfaces;
+using TesorosChoco.API.Common;
 
 namespace TesorosChoco.API.Controllers;
 
@@ -19,17 +20,15 @@ public class CartController : ControllerBase
     {
         _cartService = cartService;
         _logger = logger;
-    }
-
-    /// <summary>
+    }    /// <summary>
     /// Obtiene el carrito del usuario autenticado
     /// </summary>
     /// <returns>Carrito del usuario</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(CartDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<CartDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<CartDto>> GetCart()
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<CartDto>>> GetCart()
     {
         try
         {
@@ -38,14 +37,15 @@ public class CartController : ControllerBase
             
             var cart = await _cartService.GetCartByUserIdAsync(userId);
             
-            return Ok(cart);
+            return Ok(ApiResponse<CartDto>.SuccessResponse(cart, "Cart retrieved successfully"));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting cart");
-            return StatusCode(500, new { error = "Internal server error", message = "An error occurred while getting the cart" });
+            return StatusCode(StatusCodes.Status500InternalServerError, 
+                ApiResponse<CartDto>.ErrorResponse("An error occurred while getting the cart"));
         }
-    }    /// <summary>
+    }/// <summary>
     /// Actualiza el carrito del usuario (agregar/modificar items)
     /// </summary>
     /// <param name="request">Datos del carrito a actualizar</param>
@@ -276,9 +276,113 @@ public class CartController : ControllerBase
             return BadRequest(new { error = "Invalid request", message = ex.Message });
         }
         catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error removing item from cart");
+        {            _logger.LogError(ex, "Error removing item from cart");
             return StatusCode(500, new { error = "Internal server error", message = "An error occurred while removing item from cart" });
+        }
+    }
+
+    /// <summary>
+    /// Reserva stock para todos los items del carrito antes del checkout
+    /// </summary>
+    /// <returns>Resultado de la reserva</returns>
+    [HttpPost("reserve-stock")]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<object>>> ReserveCartStock()
+    {
+        try
+        {
+            var userId = GetCurrentUserId();
+            var sessionId = HttpContext.Session.Id;
+            
+            _logger.LogInformation("Reserving stock for cart of user: {UserId}", userId);
+            
+            var success = await _cartService.ReserveCartStockAsync(userId, sessionId);
+            
+            if (success)
+            {
+                _logger.LogInformation("Stock reserved successfully for user: {UserId}", userId);
+                return Ok(ApiResponse.SuccessResponse("Stock reserved successfully"));
+            }
+            else
+            {
+                _logger.LogWarning("Failed to reserve stock for user: {UserId}", userId);
+                return BadRequest(ApiResponse.ErrorResponse("Unable to reserve stock. Some items may be out of stock."));
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error reserving stock for cart");
+            return StatusCode(StatusCodes.Status500InternalServerError, 
+                ApiResponse.ErrorResponse("An error occurred while reserving stock"));
+        }
+    }
+
+    /// <summary>
+    /// Libera las reservas de stock del carrito
+    /// </summary>
+    /// <returns>Resultado de la liberación</returns>
+    [HttpPost("release-reservations")]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<object>>> ReleaseCartReservations()
+    {
+        try
+        {
+            var userId = GetCurrentUserId();
+            
+            _logger.LogInformation("Releasing cart reservations for user: {UserId}", userId);
+            
+            await _cartService.ReleaseCartReservationsAsync(userId);
+            
+            _logger.LogInformation("Cart reservations released successfully for user: {UserId}", userId);
+            return Ok(ApiResponse.SuccessResponse("Reservations released successfully"));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error releasing cart reservations");
+            return StatusCode(StatusCodes.Status500InternalServerError, 
+                ApiResponse.ErrorResponse("An error occurred while releasing reservations"));
+        }
+    }
+
+    /// <summary>
+    /// Valida la disponibilidad de stock de todos los items del carrito
+    /// </summary>
+    /// <returns>Resultado de la validación</returns>
+    [HttpGet("validate-stock")]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<object>>> ValidateCartStock()
+    {
+        try
+        {
+            var userId = GetCurrentUserId();
+            
+            _logger.LogInformation("Validating cart stock for user: {UserId}", userId);
+            
+            var isValid = await _cartService.ValidateCartStockAsync(userId);
+            
+            if (isValid)
+            {
+                _logger.LogInformation("Cart stock validation passed for user: {UserId}", userId);
+                return Ok(ApiResponse.SuccessResponse("All items are available"));
+            }
+            else
+            {
+                _logger.LogWarning("Cart stock validation failed for user: {UserId}", userId);
+                return Ok(ApiResponse.ErrorResponse("Some items are out of stock"));
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error validating cart stock");
+            return StatusCode(StatusCodes.Status500InternalServerError, 
+                ApiResponse.ErrorResponse("An error occurred while validating stock"));
         }
     }
 

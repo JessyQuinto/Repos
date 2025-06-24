@@ -5,6 +5,7 @@ using TesorosChoco.Application.DTOs;
 using TesorosChoco.Application.Queries.Products;
 using TesorosChoco.Application.Commands.Products;
 using TesorosChoco.Application.DTOs.Requests;
+using TesorosChoco.API.Common;
 
 namespace TesorosChoco.API.Controllers;
 
@@ -54,10 +55,8 @@ public class ProductsController : ControllerBase
                 SearchTerm = searchTerm,
                 Page = page,
                 PageSize = Math.Min(pageSize, 100) // Limit page size
-            };
-
-            var products = await _mediator.Send(query);
-            return Ok(products);
+            };            var products = await _mediator.Send(query);
+            return Ok(ApiResponse<IEnumerable<ProductDto>>.SuccessResponse(products, "Products retrieved successfully"));
         }
         catch (FluentValidation.ValidationException ex)
         {

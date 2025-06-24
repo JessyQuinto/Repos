@@ -123,7 +123,15 @@ public static class DependencyInjection
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IPasswordService, PasswordService>();
         services.AddScoped<IEmailService, EmailService>();
-        services.AddScoped<ICacheService, CacheService>();// Repository Registration
+        services.AddScoped<ICacheService, CacheService>();
+        
+        // Unit of Work
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        
+        // Inventory Management
+        services.AddScoped<IInventoryService, InventoryService>();
+
+        // Repository Registration
         // services.AddScoped(typeof(IRepository<>), typeof(BaseRepository<>));
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IProductRepository, ProductRepository>();
@@ -131,6 +139,7 @@ public static class DependencyInjection
         services.AddScoped<IProducerRepository, ProducerRepository>();
         services.AddScoped<ICartRepository, CartRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
+        services.AddScoped<IStockReservationRepository, StockReservationRepository>();
         services.AddScoped<IContactMessageRepository, ContactMessageRepository>();
         services.AddScoped<INewsletterSubscriptionRepository, NewsletterSubscriptionRepository>();
 

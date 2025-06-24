@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TesorosChoco.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using TesorosChoco.Infrastructure.Data;
 namespace TesorosChoco.Infrastructure.Migrations
 {
     [DbContext(typeof(TesorosChocoDbContext))]
-    partial class TesorosChocoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250624231741_AddStockReservation")]
+    partial class AddStockReservation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
