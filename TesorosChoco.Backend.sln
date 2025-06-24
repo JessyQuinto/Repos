@@ -1,0 +1,42 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TesorosChoco.API", "TesorosChoco.API\TesorosChoco.API.csproj", "{5B7E9179-FB16-1ACE-1F8E-9C60304744FA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TesorosChoco.Application", "TesorosChoco.Application\TesorosChoco.Application.csproj", "{1E67D954-333E-6CBA-7791-9135DF5AE86E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TesorosChoco.Domain", "TesorosChoco.Domain\TesorosChoco.Domain.csproj", "{3C4BB361-EA5F-3F46-BF95-C4A77B6D82CC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TesorosChoco.Infrastructure", "TesorosChoco.Infrastructure\TesorosChoco.Infrastructure.csproj", "{49231C3E-2197-E0EC-4781-CD684468E658}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5B7E9179-FB16-1ACE-1F8E-9C60304744FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B7E9179-FB16-1ACE-1F8E-9C60304744FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B7E9179-FB16-1ACE-1F8E-9C60304744FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B7E9179-FB16-1ACE-1F8E-9C60304744FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E67D954-333E-6CBA-7791-9135DF5AE86E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E67D954-333E-6CBA-7791-9135DF5AE86E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E67D954-333E-6CBA-7791-9135DF5AE86E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E67D954-333E-6CBA-7791-9135DF5AE86E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C4BB361-EA5F-3F46-BF95-C4A77B6D82CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C4BB361-EA5F-3F46-BF95-C4A77B6D82CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C4BB361-EA5F-3F46-BF95-C4A77B6D82CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C4BB361-EA5F-3F46-BF95-C4A77B6D82CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49231C3E-2197-E0EC-4781-CD684468E658}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49231C3E-2197-E0EC-4781-CD684468E658}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49231C3E-2197-E0EC-4781-CD684468E658}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49231C3E-2197-E0EC-4781-CD684468E658}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {185C2103-9373-41C7-80D4-3E48612E574E}
+	EndGlobalSection
+EndGlobal
