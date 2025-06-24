@@ -90,9 +90,19 @@ public class OrderService : IOrderService
                 Status = OrderStatus.Pending,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
-            };
-
-            var createdOrder = await _orderRepository.CreateAsync(order);
+            };            var createdOrder = await _orderRepository.CreateAsync(order);
+            
+            // TODO: CRITICAL - Reduce stock for ordered items
+            // This should be done in a transaction to ensure data consistency
+            foreach (var item in orderItems)
+            {
+                var product = await _productRepository.GetByIdAsync(item.ProductId);
+                if (product != null)
+                {
+                    product.Stock -= item.Quantity;
+                    await _productRepository.UpdateAsync(product);
+                }
+            }
             
             // Reload with navigation properties
             var orderWithDetails = await _orderRepository.GetByIdAsync(createdOrder.Id);

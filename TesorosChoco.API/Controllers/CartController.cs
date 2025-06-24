@@ -122,7 +122,7 @@ public class CartController : ControllerBase
             var userId = GetCurrentUserId();
             _logger.LogInformation("Adding item to cart for user: {UserId}, Product: {ProductId}", userId, request.ProductId);
             
-            var cart = await _cartService.AddItemAsync(userId, request);
+            var cart = await _cartService.AddToCartAsync(userId, request);
             
             _logger.LogInformation("Item added to cart successfully for user: {UserId}", userId);
             return Ok(cart);
@@ -211,6 +211,74 @@ public class CartController : ControllerBase
         {
             _logger.LogError(ex, "Error removing cart item");
             return StatusCode(500, new { error = "Internal server error", message = "An error occurred while removing cart item" });
+        }
+    }
+
+    /// <summary>
+    /// Agrega un item específico al carrito
+    /// </summary>
+    /// <param name="request">Item a agregar</param>
+    /// <returns>Carrito actualizado</returns>
+    [HttpPost("add")]
+    [ProducesResponseType(typeof(CartDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<CartDto>> AddToCart([FromBody] AddCartItemRequest request)
+    {
+        try
+        {
+            var userId = GetCurrentUserId();
+            _logger.LogInformation("Adding item to cart for user: {UserId}, ProductId: {ProductId}", userId, request.ProductId);
+            
+            var cart = await _cartService.AddToCartAsync(userId, request);
+            
+            _logger.LogInformation("Item added to cart successfully for user: {UserId}", userId);
+            return Ok(cart);
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning("Failed to add item to cart: {Message}", ex.Message);
+            return BadRequest(new { error = "Invalid request", message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error adding item to cart");
+            return StatusCode(500, new { error = "Internal server error", message = "An error occurred while adding item to cart" });
+        }
+    }
+
+    /// <summary>
+    /// Elimina un item específico del carrito
+    /// </summary>
+    /// <param name="productId">ID del producto a eliminar</param>
+    /// <returns>Carrito actualizado</returns>
+    [HttpDelete("remove/{productId}")]
+    [ProducesResponseType(typeof(CartDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<CartDto>> RemoveFromCart(int productId)
+    {
+        try
+        {
+            var userId = GetCurrentUserId();
+            _logger.LogInformation("Removing item from cart for user: {UserId}, ProductId: {ProductId}", userId, productId);
+            
+            var cart = await _cartService.RemoveFromCartAsync(userId, productId);
+            
+            _logger.LogInformation("Item removed from cart successfully for user: {UserId}", userId);
+            return Ok(cart);
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning("Failed to remove item from cart: {Message}", ex.Message);
+            return BadRequest(new { error = "Invalid request", message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error removing item from cart");
+            return StatusCode(500, new { error = "Internal server error", message = "An error occurred while removing item from cart" });
         }
     }
 

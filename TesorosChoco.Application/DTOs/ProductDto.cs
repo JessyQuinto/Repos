@@ -14,7 +14,7 @@ public class ProductDto
     public int ProducerId { get; set; }
     public int Stock { get; set; }
     public bool Featured { get; set; }
-    public decimal? Rating { get; set; }
+    public double? Rating { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }

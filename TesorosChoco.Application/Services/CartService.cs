@@ -267,4 +267,86 @@ public class CartService : ICartService
             throw new InvalidOperationException($"Error removing cart item {itemId} for user {userId}", ex);
         }
     }
+
+    public async Task<CartDto> AddToCartAsync(int userId, AddCartItemRequest request)
+    {
+        try
+        {
+            var cart = await _cartRepository.GetByUserIdAsync(userId);
+            
+            if (cart == null)
+            {
+                cart = new Cart
+                {
+                    UserId = userId,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    Items = new List<CartItem>()
+                };
+            }
+
+            // Validate product exists
+            var product = await _productRepository.GetByIdAsync(request.ProductId);
+            if (product == null)
+            {
+                throw new ArgumentException($"Product with ID {request.ProductId} does not exist");
+            }
+
+            // Check if item already exists in cart
+            var existingItem = cart.Items.FirstOrDefault(i => i.ProductId == request.ProductId);
+            if (existingItem != null)
+            {
+                // Update quantity
+                existingItem.Quantity += request.Quantity;
+                existingItem.Price = product.CurrentPrice; // Update to current price
+            }
+            else
+            {
+                // Add new item
+                var cartItem = new CartItem
+                {
+                    ProductId = request.ProductId,
+                    Quantity = request.Quantity,
+                    Price = product.CurrentPrice
+                };
+                cart.Items.Add(cartItem);
+            }
+
+            cart.UpdatedAt = DateTime.UtcNow;
+
+            var updatedCart = cart.Id == 0 
+                ? await _cartRepository.CreateAsync(cart)
+                : await _cartRepository.UpdateAsync(cart);
+
+            return _mapper.Map<CartDto>(updatedCart);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Error adding item to cart for user {userId}", ex);
+        }
+    }
+
+    public async Task<CartDto> RemoveFromCartAsync(int userId, int productId)
+    {
+        try
+        {
+            var cart = await _cartRepository.GetByUserIdAsync(userId);
+            if (cart == null)
+                throw new ArgumentException("Cart not found for user");
+
+            var cartItem = cart.Items.FirstOrDefault(i => i.ProductId == productId);
+            if (cartItem == null)
+                throw new ArgumentException($"Product with ID {productId} not found in cart");
+
+            cart.Items.Remove(cartItem);
+            cart.UpdatedAt = DateTime.UtcNow;
+            
+            var updatedCart = await _cartRepository.UpdateAsync(cart);
+            return _mapper.Map<CartDto>(updatedCart);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Error removing product {productId} from cart for user {userId}", ex);
+        }
+    }
 }

@@ -97,7 +97,7 @@ public class AuthController : ControllerBase
     /// </summary>
     /// <param name="request">Refresh token</param>
     /// <returns>Nuevo token de acceso</returns>
-    [HttpPost("refresh")]
+    [HttpPost("refresh-token")]
     [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

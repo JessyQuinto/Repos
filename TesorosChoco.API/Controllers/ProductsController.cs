@@ -357,4 +357,41 @@ public class ProductsController : ControllerBase
             });
         }
     }
+
+    /// <summary>
+    /// Obtiene un producto específico por su slug
+    /// </summary>
+    /// <param name="slug">Slug del producto</param>
+    /// <returns>Producto específico</returns>
+    [HttpGet("slug/{slug}")]
+    [ProducesResponseType(typeof(ProductDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ProductDto>> GetProductBySlug(string slug)
+    {
+        try
+        {
+            var query = new GetProductBySlugQuery(slug);
+            var product = await _mediator.Send(query);
+            
+            if (product == null)
+            {
+                _logger.LogWarning("Product with slug {ProductSlug} not found", slug);
+                return NotFound(new { 
+                    error = "Product not found", 
+                    message = $"Product with slug '{slug}' was not found" 
+                });
+            }
+            
+            return Ok(product);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting product with slug {ProductSlug}", slug);
+            return StatusCode(500, new { 
+                error = "Internal server error", 
+                message = "An error occurred while getting the product" 
+            });
+        }
+    }
 }

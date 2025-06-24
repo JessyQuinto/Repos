@@ -13,6 +13,7 @@ namespace TesorosChoco.Application.Handlers.Products;
 public class ProductQueryHandler : 
     IRequestHandler<GetAllProductsQuery, IEnumerable<ProductDto>>,
     IRequestHandler<GetProductByIdQuery, ProductDto?>,
+    IRequestHandler<GetProductBySlugQuery, ProductDto?>,
     IRequestHandler<GetFeaturedProductsQuery, IEnumerable<ProductDto>>
 {
     private readonly IProductRepository _productRepository;
@@ -99,7 +100,32 @@ public class ProductQueryHandler :
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving product with ID {ProductId}", request.Id);
-            throw;        }
+            throw;
+        }
+    }
+
+    public async Task<ProductDto?> Handle(GetProductBySlugQuery request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            _logger.LogInformation("Getting product by slug: {ProductSlug}", request.Slug);
+            
+            var product = await _productRepository.GetBySlugAsync(request.Slug);
+            if (product == null)
+            {
+                _logger.LogWarning("Product with slug {ProductSlug} not found", request.Slug);
+                return null;
+            }
+
+            var result = _mapper.Map<ProductDto>(product);
+            _logger.LogInformation("Retrieved product: {ProductName}", product.Name);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving product with slug {ProductSlug}", request.Slug);
+            throw;
+        }
     }
 
     public async Task<IEnumerable<ProductDto>> Handle(GetFeaturedProductsQuery request, CancellationToken cancellationToken)
