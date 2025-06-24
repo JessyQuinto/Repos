@@ -215,6 +215,73 @@ public class ProductRepository : BaseRepository<Product>, IProductRepository
         }
     }
 
+    public async Task<(IEnumerable<Product> Products, int Total)> SearchProductsAsync(
+        string? searchTerm = null, 
+        int? categoryId = null, 
+        decimal? minPrice = null, 
+        decimal? maxPrice = null, 
+        int? producerId = null, 
+        bool? featured = null, 
+        int limit = 10, 
+        int offset = 0)
+    {
+        try
+        {
+            var query = _dbSet
+                .Include(p => p.Category)
+                .Include(p => p.Producer)
+                .AsQueryable();
+
+            // Apply filters
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                query = query.Where(p => p.Name.Contains(searchTerm) || 
+                                        p.Description.Contains(searchTerm));
+            }
+
+            if (categoryId.HasValue)
+            {
+                query = query.Where(p => p.CategoryId == categoryId.Value);
+            }
+
+            if (producerId.HasValue)
+            {
+                query = query.Where(p => p.ProducerId == producerId.Value);
+            }
+
+            if (minPrice.HasValue)
+            {
+                query = query.Where(p => p.CurrentPrice >= minPrice.Value);
+            }
+
+            if (maxPrice.HasValue)
+            {
+                query = query.Where(p => p.CurrentPrice <= maxPrice.Value);
+            }
+
+            if (featured.HasValue)
+            {
+                query = query.Where(p => p.Featured == featured.Value);
+            }
+
+            // Get total count before pagination
+            var total = await query.CountAsync();
+
+            // Apply pagination with offset
+            var products = await query
+                .OrderBy(p => p.Name) // Default sorting
+                .Skip(offset)
+                .Take(limit)
+                .ToListAsync();
+
+            return (products, total);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("Error searching products with advanced filters", ex);
+        }
+    }
+
     public new async Task<Product> CreateAsync(Product product)
     {
         try

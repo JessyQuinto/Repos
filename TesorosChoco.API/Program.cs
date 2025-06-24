@@ -9,6 +9,7 @@ using TesorosChoco.Application;
 using TesorosChoco.API.Middlewares;
 using Serilog;
 using FluentValidation.AspNetCore;
+using System.Text.Json;
 
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
@@ -25,7 +26,12 @@ try
 
     // Add Serilog
     builder.Host.UseSerilog();    // Add services to the container
-    builder.Services.AddControllers();
+    builder.Services.AddControllers()
+        .AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+            options.JsonSerializerOptions.WriteIndented = true;
+        });
 
     // Add Problem Details (para manejo de errores)
     builder.Services.AddProblemDetails(options =>
