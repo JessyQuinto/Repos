@@ -121,8 +121,9 @@ public static class DependencyInjection
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IRefreshTokenService, RefreshTokenService>();
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IPasswordService, PasswordService>();
         services.AddScoped<IEmailService, EmailService>();
-        services.AddScoped<ICacheService, CacheService>();        // Repository Registration
+        services.AddScoped<ICacheService, CacheService>();// Repository Registration
         // services.AddScoped(typeof(IRepository<>), typeof(BaseRepository<>));
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IProductRepository, ProductRepository>();

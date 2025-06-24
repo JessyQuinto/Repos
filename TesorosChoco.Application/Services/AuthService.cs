@@ -17,17 +17,19 @@ public class AuthService : IAuthService
     private readonly IUserRepository _userRepository;
     private readonly ITokenService _tokenService;
     private readonly IRefreshTokenService _refreshTokenService;
+    private readonly IPasswordService _passwordService;
     private readonly IMapper _mapper;
 
     public AuthService(
         IUserRepository userRepository,
         ITokenService tokenService,
         IRefreshTokenService refreshTokenService,
-        IMapper mapper)
+        IPasswordService passwordService,        IMapper mapper)
     {
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
         _refreshTokenService = refreshTokenService ?? throw new ArgumentNullException(nameof(refreshTokenService));
+        _passwordService = passwordService ?? throw new ArgumentNullException(nameof(passwordService));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
     }
 
@@ -47,10 +49,8 @@ public class AuthService : IAuthService
             // Get user by email
             var user = await _userRepository.GetByEmailAsync(email);
             if (user == null)
-                throw new UnauthorizedAccessException("Invalid email or password");
-
-            // Verify password
-            if (!VerifyPassword(request.Password, user.PasswordHash))
+                throw new UnauthorizedAccessException("Invalid email or password");            // Verify password
+            if (!_passwordService.VerifyPassword(request.Password, user.PasswordHash))
                 throw new UnauthorizedAccessException("Invalid email or password");
 
             // Generate JWT token and refresh token
@@ -99,7 +99,7 @@ public class AuthService : IAuthService
                 throw new InvalidOperationException("A user with this email already exists");
 
             // Hash password
-            var passwordHash = HashPassword(request.Password);
+            var passwordHash = _passwordService.HashPassword(request.Password);
 
             // Create new user
             var user = new User
@@ -294,7 +294,7 @@ public class AuthService : IAuthService
             }
 
             // Update password
-            user.PasswordHash = HashPassword(request.NewPassword);
+            user.PasswordHash = _passwordService.HashPassword(request.NewPassword);
             user.UpdatedAt = DateTime.UtcNow;
             
             await _userRepository.UpdateAsync(user);
@@ -326,36 +326,4 @@ public class AuthService : IAuthService
         using var sha256 = System.Security.Cryptography.SHA256.Create();
         var hashedBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(data));
         return Convert.ToBase64String(hashedBytes);
-    }
-
-    /// <summary>
-    /// Hash password using a secure hashing algorithm
-    /// In production, use BCrypt or Argon2
-    /// </summary>
-    private static string HashPassword(string password)
-    {
-        // TODO: Implement proper password hashing (BCrypt, Argon2, etc.)
-        // This is a simplified implementation for development - DO NOT USE IN PRODUCTION
-        using var sha256 = System.Security.Cryptography.SHA256.Create();
-        var hashedBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password + "TesorosChoco_Salt"));
-        return Convert.ToBase64String(hashedBytes);
-    }
-
-    /// <summary>
-    /// Verify password against stored hash
-    /// </summary>
-    private static bool VerifyPassword(string password, string hash)
-    {
-        // TODO: Implement proper password verification
-        // This is a simplified implementation for development - DO NOT USE IN PRODUCTION
-        try
-        {
-            var passwordHash = HashPassword(password);
-            return passwordHash == hash;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-}
+    }}
