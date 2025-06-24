@@ -393,5 +393,63 @@ packages-lock.json
 !.vscode/extensions.json
 
 # Entity Framework
-Migrations/
-!Migrations/Configuration.cs
+# Note: Comment out the next line if you want to track migrations
+# Migrations/
+# !Migrations/Configuration.cs
+
+# Azure specific
+*.azurePubxml
+
+# Docker
+Dockerfile*
+!Dockerfile
+docker-compose*.yml
+!docker-compose.yml
+.dockerignore
+
+# IDE specific
+.vs/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Backup files
+*.bak
+*.backup
+*.orig
+
+# Testing
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# Package files
+*.nupkg
+*.snupkg
+
+# Azure DevOps
+.azure/
+
+# AZD (Azure Developer CLI)
+.azure/
+azure.yaml
+!azure.yaml
+
+# Secrets and sensitive files
+secrets.json
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json
+
+# Health check database
+healthchecksdb*
+
+# User-specific VS Code settings
+.vscode/settings.json
+.vscode/tasks.json
+.vscode/launch.json
+.vscode/extensions.json
+.vscode/c_cpp_properties.json
+.vscode/launch.test.json
