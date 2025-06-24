@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "bQAktVjdZf8=",
+  "dgSpecHash": "TejhW9IeNHY=",
   "success": true,
-  "projectFilePath": "c:\\Users\\Jessy\\Source\\Repos\\TesorosChoco.Backend\\TesorosChoco.Infrastructure\\TesorosChoco.Infrastructure.csproj",
+  "projectFilePath": "C:\\Users\\Jessy\\Source\\Repos\\TesorosChoco.Backend\\TesorosChoco.Infrastructure\\TesorosChoco.Infrastructure.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Jessy\\.nuget\\packages\\automapper\\13.0.1\\automapper.13.0.1.nupkg.sha512",
     "C:\\Users\\Jessy\\.nuget\\packages\\automapper.extensions.microsoft.dependencyinjection\\12.0.1\\automapper.extensions.microsoft.dependencyinjection.12.0.1.nupkg.sha512",
@@ -97,10 +97,10 @@
     {
       "code": "NU1608",
       "level": "Warning",
-      "message": "Se detectó una versión del paquete fuera de la restricción de dependencia: AutoMapper.Extensions.Microsoft.DependencyInjection 12.0.1 requiere AutoMapper (= 12.0.1), pero la versión AutoMapper 13.0.1 ya se resolvió.",
-      "projectPath": "c:\\Users\\Jessy\\Source\\Repos\\TesorosChoco.Backend\\TesorosChoco.Infrastructure\\TesorosChoco.Infrastructure.csproj",
+      "message": "Detected package version outside of dependency constraint: AutoMapper.Extensions.Microsoft.DependencyInjection 12.0.1 requires AutoMapper (= 12.0.1) but version AutoMapper 13.0.1 was resolved.",
+      "projectPath": "C:\\Users\\Jessy\\Source\\Repos\\TesorosChoco.Backend\\TesorosChoco.Infrastructure\\TesorosChoco.Infrastructure.csproj",
       "warningLevel": 1,
-      "filePath": "c:\\Users\\Jessy\\Source\\Repos\\TesorosChoco.Backend\\TesorosChoco.Infrastructure\\TesorosChoco.Infrastructure.csproj",
+      "filePath": "C:\\Users\\Jessy\\Source\\Repos\\TesorosChoco.Backend\\TesorosChoco.Infrastructure\\TesorosChoco.Infrastructure.csproj",
       "libraryId": "AutoMapper",
       "targetGraphs": [
         "net9.0"

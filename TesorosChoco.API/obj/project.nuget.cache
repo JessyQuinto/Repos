@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "oyybFhVT5tE=",
+  "dgSpecHash": "I3HNBlYwDmc=",
   "success": true,
   "projectFilePath": "C:\\Users\\Jessy\\Source\\Repos\\TesorosChoco.Backend\\TesorosChoco.API\\TesorosChoco.API.csproj",
   "expectedPackageFiles": [
@@ -119,7 +119,7 @@
     {
       "code": "NU1608",
       "level": "Warning",
-      "message": "Se detectó una versión del paquete fuera de la restricción de dependencia: AutoMapper.Extensions.Microsoft.DependencyInjection 12.0.1 requiere AutoMapper (= 12.0.1), pero la versión AutoMapper 13.0.1 ya se resolvió.",
+      "message": "Detected package version outside of dependency constraint: AutoMapper.Extensions.Microsoft.DependencyInjection 12.0.1 requires AutoMapper (= 12.0.1) but version AutoMapper 13.0.1 was resolved.",
       "projectPath": "C:\\Users\\Jessy\\Source\\Repos\\TesorosChoco.Backend\\TesorosChoco.API\\TesorosChoco.API.csproj",
       "warningLevel": 1,
       "filePath": "C:\\Users\\Jessy\\Source\\Repos\\TesorosChoco.Backend\\TesorosChoco.API\\TesorosChoco.API.csproj",

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TesorosChoco.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0cd130e2a2f169930b0abad90741ece187042ddb")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+20a3d4ac71d624ceb9e3ba3e27083d18eeb55678")]
 [assembly: System.Reflection.AssemblyProductAttribute("TesorosChoco.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TesorosChoco.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
