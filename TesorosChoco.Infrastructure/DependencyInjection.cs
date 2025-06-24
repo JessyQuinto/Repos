@@ -62,7 +62,7 @@ public static class DependencyInjection
         .AddEntityFrameworkStores<ApplicationIdentityDbContext>()
         .AddDefaultTokenProviders();        // JWT Authentication
         var jwtSettings = configuration.GetSection("Jwt");
-        var secretKey = jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key not configured");
+        var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey not configured");
         
         services.AddAuthentication(options =>
         {

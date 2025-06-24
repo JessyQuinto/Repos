@@ -78,6 +78,24 @@ public class ProductRepository : BaseRepository<Product>, IProductRepository
         }
     }
 
+    public async Task<IEnumerable<Product>> GetFeaturedAsync(int count)
+    {
+        try
+        {
+            return await _dbSet
+                .Include(p => p.Category)
+                .Include(p => p.Producer)
+                .Where(p => p.Featured)
+                .OrderBy(p => p.Name)
+                .Take(count)
+                .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Error retrieving {count} featured products", ex);
+        }
+    }
+
     public async Task<IEnumerable<Product>> GetByCategoryIdAsync(int categoryId)
     {
         try
@@ -239,6 +257,19 @@ public class ProductRepository : BaseRepository<Product>, IProductRepository
         catch (Exception ex)
         {
             throw new InvalidOperationException($"Error deleting product {id}", ex);
+        }
+    }
+
+    public async Task AddAsync(Product product)
+    {
+        try
+        {
+            _dbSet.Add(product);
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("Error adding product", ex);
         }
     }
 }

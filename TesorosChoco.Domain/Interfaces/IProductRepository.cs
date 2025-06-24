@@ -8,10 +8,12 @@ public interface IProductRepository
     Task<Product?> GetBySlugAsync(string slug);
     Task<IEnumerable<Product>> GetAllAsync();
     Task<IEnumerable<Product>> GetFeaturedAsync();
+    Task<IEnumerable<Product>> GetFeaturedAsync(int count);
     Task<IEnumerable<Product>> GetByCategoryIdAsync(int categoryId);
     Task<IEnumerable<Product>> GetByProducerIdAsync(int producerId);
     Task<(IEnumerable<Product> Products, int Total)> SearchAsync(string? searchTerm = null, int? categoryId = null, int? producerId = null, decimal? minPrice = null, decimal? maxPrice = null, bool? featured = null, int page = 1, int limit = 10, string sortBy = "name", string sortOrder = "asc");
     Task<Product> CreateAsync(Product product);
     Task<Product> UpdateAsync(Product product);
+    Task AddAsync(Product product);
     Task DeleteAsync(int id);
 }

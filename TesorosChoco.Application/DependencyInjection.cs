@@ -5,24 +5,34 @@ using MediatR;
 using TesorosChoco.Application.Interfaces;
 using TesorosChoco.Application.Services;
 using TesorosChoco.Application.Mappings;
+using TesorosChoco.Application.Behaviors;
 
 namespace TesorosChoco.Application;
 
 /// <summary>
 /// Application layer dependency injection configuration
-/// Registers all application services, validators, and MediatR handlers
+/// Registers all application services, validators, MediatR handlers, and pipeline behaviors
 /// </summary>
 public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
-    {        // AutoMapper
-        services.AddAutoMapper(typeof(MappingProfile).Assembly);
+    {
+        var assembly = Assembly.GetExecutingAssembly();
 
-        // MediatR for CQRS pattern
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+        // AutoMapper
+        services.AddAutoMapper(typeof(MappingProfile).Assembly);        // MediatR for CQRS pattern with pipeline behaviors (order matters!)
+        services.AddMediatR(cfg => {
+            cfg.RegisterServicesFromAssembly(assembly);
+            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
+            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(PerformanceBehavior<,>));
+            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ExceptionHandlingBehavior<,>));
+        });
 
         // FluentValidation
-        services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());        // Application Services
+        services.AddValidatorsFromAssembly(assembly);
+
+        // Application Services (legacy - will be gradually replaced by CQRS)
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IProductService, ProductService>();
