@@ -3,12 +3,15 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using TesorosChoco.Domain.Entities;
+using TesorosChoco.Domain.Interfaces;
 
 namespace TesorosChoco.Infrastructure.Services;
 
 /// <summary>
 /// JWT Token service for generating and validating authentication tokens
 /// Implements secure token generation with configurable expiration times
+/// Consolidates both IJwtTokenService and ITokenService interfaces
 /// </summary>
 public interface IJwtTokenService
 {
@@ -18,7 +21,7 @@ public interface IJwtTokenService
     bool ValidateToken(string token);
 }
 
-public class JwtTokenService : IJwtTokenService
+public class JwtTokenService : IJwtTokenService, ITokenService
 {
     private readonly IConfiguration _configuration;
     private readonly string _secretKey;
@@ -68,6 +71,18 @@ public class JwtTokenService : IJwtTokenService
 
         var token = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(token);
+    }
+
+    // ITokenService implementation
+    public string GenerateAccessToken(User user)
+    {
+        if (user == null)
+            throw new ArgumentNullException(nameof(user));
+
+        // For now, assign default role. In future, implement proper role management
+        var roles = new List<string> { "User" };
+        
+        return GenerateAccessToken(user.Id, user.Email, roles);
     }
 
     public string GenerateRefreshToken()

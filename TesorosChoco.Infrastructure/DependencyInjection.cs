@@ -118,7 +118,7 @@ public static class DependencyInjection
             }
         });        // Infrastructure Services
         services.AddScoped<IJwtTokenService, JwtTokenService>();
-        services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<ITokenService, JwtTokenService>(); // Use the same instance for both interfaces
         services.AddScoped<IRefreshTokenService, RefreshTokenService>();
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IPasswordService, PasswordService>();

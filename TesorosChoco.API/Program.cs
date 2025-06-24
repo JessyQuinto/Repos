@@ -21,12 +21,13 @@ Log.Logger = new LoggerConfiguration()
 
 try
 {
-    Log.Information("Starting TesorosChoco API");
-    
+    Log.Information("Starting TesorosChoco API");    
     var builder = WebApplication.CreateBuilder(args);
 
-    // Add Serilog
-    builder.Host.UseSerilog();    // Add services to the container
+    // Add Serilog for structured logging
+    builder.Host.UseSerilog();
+    
+    // Add services to the container
     builder.Services.AddControllers()
         .AddJsonOptions(options =>
         {
@@ -46,22 +47,22 @@ try
     
     // Add FluentValidation
     builder.Services.AddFluentValidationAutoValidation()
-                    .AddFluentValidationClientsideAdapters();
-
-    // Add Infrastructure and Application layers
+                    .AddFluentValidationClientsideAdapters();    // Add Infrastructure and Application layers
     builder.Services.AddInfrastructure(builder.Configuration);
-    builder.Services.AddApplication();    // Add API versioning (simplified)
+    builder.Services.AddApplication();
+    
+    // Add API versioning (simplified)
     builder.Services.AddApiVersioning(opt =>
     {
         opt.DefaultApiVersion = new ApiVersion(1, 0);
         opt.AssumeDefaultVersionWhenUnspecified = true;
-    });
-
-    builder.Services.AddVersionedApiExplorer(setup =>
+    });    builder.Services.AddVersionedApiExplorer(setup =>
     {
         setup.GroupNameFormat = "'v'VVV";
         setup.SubstituteApiVersionInUrl = true;
-    });    // Add CORS
+    });
+    
+    // Add CORS
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("AllowFrontend", policy =>
@@ -114,10 +115,10 @@ try
         });
     });
 
-    var app = builder.Build();
-
-    // Ensure database is created and seeded
-    await app.Services.EnsureDatabaseCreatedAsync();    // Configure the HTTP request pipeline
+    var app = builder.Build();    // Ensure database is created and seeded
+    await app.Services.EnsureDatabaseCreatedAsync();
+    
+    // Configure the HTTP request pipeline
     if (app.Environment.IsDevelopment())
     {
         app.UseDeveloperExceptionPage();

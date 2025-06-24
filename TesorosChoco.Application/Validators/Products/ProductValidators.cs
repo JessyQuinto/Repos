@@ -11,38 +11,14 @@ public class CreateProductCommandValidator : AbstractValidator<CreateProductComm
 {
     public CreateProductCommandValidator()
     {
-        RuleFor(x => x.Request.Name)
-            .NotEmpty().WithMessage("Product name is required")
-            .MaximumLength(200).WithMessage("Product name cannot exceed 200 characters");
-
-        RuleFor(x => x.Request.Slug)
-            .NotEmpty().WithMessage("Product slug is required")
-            .Matches("^[a-z0-9-]+$").WithMessage("Slug can only contain lowercase letters, numbers, and hyphens")
-            .MaximumLength(200).WithMessage("Slug cannot exceed 200 characters");
-
-        RuleFor(x => x.Request.Description)
-            .NotEmpty().WithMessage("Product description is required")
-            .MaximumLength(2000).WithMessage("Description cannot exceed 2000 characters");
-
-        RuleFor(x => x.Request.Price)
-            .GreaterThan(0).WithMessage("Price must be greater than 0");
-
-        RuleFor(x => x.Request.DiscountedPrice)
-            .GreaterThan(0).WithMessage("Discounted price must be greater than 0")
-            .LessThan(x => x.Request.Price).WithMessage("Discounted price must be less than regular price")
-            .When(x => x.Request.DiscountedPrice.HasValue);
-
-        RuleFor(x => x.Request.CategoryId)
-            .GreaterThan(0).WithMessage("Category ID must be specified");
-
-        RuleFor(x => x.Request.ProducerId)
-            .GreaterThan(0).WithMessage("Producer ID must be specified");
-
-        RuleFor(x => x.Request.Stock)
-            .GreaterThanOrEqualTo(0).WithMessage("Stock cannot be negative");
-
-        RuleFor(x => x.Request.Image)
-            .NotEmpty().WithMessage("Main product image is required");
+        this.AddNameValidation(x => x.Request.Name);
+        this.AddSlugValidation(x => x.Request.Slug);
+        this.AddDescriptionValidation(x => x.Request.Description);
+        this.AddPriceValidation(x => x.Request.Price, x => x.Request.DiscountedPrice);
+        this.AddCategoryValidation(x => x.Request.CategoryId);
+        this.AddProducerValidation(x => x.Request.ProducerId);
+        this.AddStockValidation(x => x.Request.Stock);
+        this.AddImageValidation(x => x.Request.Image);
     }
 }
 
@@ -56,38 +32,15 @@ public class UpdateProductCommandValidator : AbstractValidator<UpdateProductComm
         RuleFor(x => x.Id)
             .GreaterThan(0).WithMessage("Product ID must be specified");
 
-        RuleFor(x => x.Request.Name)
-            .NotEmpty().WithMessage("Product name is required")
-            .MaximumLength(200).WithMessage("Product name cannot exceed 200 characters");
-
-        RuleFor(x => x.Request.Slug)
-            .NotEmpty().WithMessage("Product slug is required")
-            .Matches("^[a-z0-9-]+$").WithMessage("Slug can only contain lowercase letters, numbers, and hyphens")
-            .MaximumLength(200).WithMessage("Slug cannot exceed 200 characters");
-
-        RuleFor(x => x.Request.Description)
-            .NotEmpty().WithMessage("Product description is required")
-            .MaximumLength(2000).WithMessage("Description cannot exceed 2000 characters");
-
-        RuleFor(x => x.Request.Price)
-            .GreaterThan(0).WithMessage("Price must be greater than 0");
-
-        RuleFor(x => x.Request.DiscountedPrice)
-            .GreaterThan(0).WithMessage("Discounted price must be greater than 0")
-            .LessThan(x => x.Request.Price).WithMessage("Discounted price must be less than regular price")
-            .When(x => x.Request.DiscountedPrice.HasValue);
-
-        RuleFor(x => x.Request.CategoryId)
-            .GreaterThan(0).WithMessage("Category ID must be specified");
-
-        RuleFor(x => x.Request.ProducerId)
-            .GreaterThan(0).WithMessage("Producer ID must be specified");
-
-        RuleFor(x => x.Request.Stock)
-            .GreaterThanOrEqualTo(0).WithMessage("Stock cannot be negative");
-
-        RuleFor(x => x.Request.Image)
-            .NotEmpty().WithMessage("Main product image is required");
+        // Reuse common validation rules
+        this.AddNameValidation(x => x.Request.Name);
+        this.AddSlugValidation(x => x.Request.Slug);
+        this.AddDescriptionValidation(x => x.Request.Description);
+        this.AddPriceValidation(x => x.Request.Price, x => x.Request.DiscountedPrice);
+        this.AddCategoryValidation(x => x.Request.CategoryId);
+        this.AddProducerValidation(x => x.Request.ProducerId);
+        this.AddStockValidation(x => x.Request.Stock);
+        this.AddImageValidation(x => x.Request.Image);
     }
 }
 
