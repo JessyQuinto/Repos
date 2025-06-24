@@ -55,17 +55,17 @@ public class AuthService : IAuthService
 
             // Generate JWT token and refresh token
             var token = _tokenService.GenerateAccessToken(user);
-            var refreshToken = await _refreshTokenService.CreateRefreshTokenAsync(user.Id);
-
-            // Update last login (if this property exists)
+            var refreshToken = await _refreshTokenService.CreateRefreshTokenAsync(user.Id);            // Update last login (if this property exists)
             user.UpdatedAt = DateTime.UtcNow;
             await _userRepository.UpdateAsync(user);
 
             return new AuthResponse
             {
                 User = _mapper.Map<UserDto>(user),
-                Token = token,
-                RefreshToken = refreshToken
+                AccessToken = token,
+                RefreshToken = refreshToken,
+                ExpiresIn = 3600, // 1 hour
+                RefreshTokenExpiresIn = 604800 // 7 days
             };
         }
         catch (Exception ex) when (!(ex is UnauthorizedAccessException))
@@ -118,13 +118,13 @@ public class AuthService : IAuthService
 
             // Generate JWT token and refresh token
             var token = _tokenService.GenerateAccessToken(user);
-            var refreshToken = await _refreshTokenService.CreateRefreshTokenAsync(user.Id);
-
-            return new AuthResponse
+            var refreshToken = await _refreshTokenService.CreateRefreshTokenAsync(user.Id);            return new AuthResponse
             {
                 User = _mapper.Map<UserDto>(user),
-                Token = token,
-                RefreshToken = refreshToken
+                AccessToken = token,
+                RefreshToken = refreshToken,
+                ExpiresIn = 3600, // 1 hour
+                RefreshTokenExpiresIn = 604800 // 7 days
             };
         }
         catch (Exception ex) when (!(ex is ArgumentException || ex is InvalidOperationException))
@@ -165,13 +165,13 @@ public class AuthService : IAuthService
 
             // Generate new tokens
             var newAccessToken = _tokenService.GenerateAccessToken(user);
-            var newRefreshToken = await _refreshTokenService.CreateRefreshTokenAsync(userId);
-
-            return new AuthResponse
+            var newRefreshToken = await _refreshTokenService.CreateRefreshTokenAsync(userId);            return new AuthResponse
             {
                 User = _mapper.Map<UserDto>(user),
-                Token = newAccessToken,
-                RefreshToken = newRefreshToken
+                AccessToken = newAccessToken,
+                RefreshToken = newRefreshToken,
+                ExpiresIn = 3600, // 1 hour
+                RefreshTokenExpiresIn = 604800 // 7 days
             };
         }
         catch (Exception ex) when (!(ex is ArgumentException || ex is UnauthorizedAccessException))

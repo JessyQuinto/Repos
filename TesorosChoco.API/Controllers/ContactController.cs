@@ -6,7 +6,7 @@ using TesorosChoco.Application.Interfaces;
 namespace TesorosChoco.API.Controllers;
 
 [ApiController]
-[Route("api/contact")]
+[Route("api/v1/contact")]
 [Produces("application/json")]
 public class ContactController : ControllerBase
 {

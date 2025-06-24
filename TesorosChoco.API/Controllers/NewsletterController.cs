@@ -6,7 +6,7 @@ using TesorosChoco.Application.Interfaces;
 namespace TesorosChoco.API.Controllers;
 
 [ApiController]
-[Route("api/newsletter")]
+[Route("api/v1/newsletter")]
 [Produces("application/json")]
 public class NewsletterController : ControllerBase
 {

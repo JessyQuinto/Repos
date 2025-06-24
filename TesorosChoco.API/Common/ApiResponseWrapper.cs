@@ -12,20 +12,19 @@ public class ApiResponse<T>
     public T? Data { get; set; }
 
     [JsonPropertyName("success")]
-    public bool Success { get; set; } = true;
+    public bool Success { get; set; }
 
     [JsonPropertyName("message")]
     public string Message { get; set; } = string.Empty;
 
     [JsonPropertyName("metadata")]
-    public ApiMetadata Metadata { get; set; }
+    public ApiMetadata Metadata { get; set; } = new();
 
     public ApiResponse()
     {
-        Metadata = new ApiMetadata();
     }
 
-    public ApiResponse(T? data, bool success = true, string message = "Operation successful")
+    public ApiResponse(T? data, bool success = true, string message = "")
     {
         Data = data;
         Success = success;
@@ -60,7 +59,9 @@ public class ApiResponse : ApiResponse<object>
     public static ApiResponse SuccessResponse(string message = "Operation successful")
     {
         return new ApiResponse(true, message);
-    }    public static ApiResponse ErrorResponse(string message)
+    }
+
+    public static new ApiResponse ErrorResponse(string message)
     {
         return new ApiResponse(false, message);
     }

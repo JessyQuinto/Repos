@@ -5,7 +5,7 @@ using TesorosChoco.Application.Interfaces;
 namespace TesorosChoco.API.Controllers;
 
 [ApiController]
-[Route("api/categories")]
+[Route("api/v1/categories")]
 [Produces("application/json")]
 public class CategoriesController : ControllerBase
 {

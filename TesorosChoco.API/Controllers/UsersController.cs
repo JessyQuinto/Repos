@@ -7,7 +7,7 @@ using TesorosChoco.Application.Interfaces;
 namespace TesorosChoco.API.Controllers;
 
 [ApiController]
-[Route("api/users")]
+[Route("api/v1/users")]
 [Produces("application/json")]
 public class UsersController : ControllerBase
 {

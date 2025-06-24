@@ -2,11 +2,12 @@ using Microsoft.AspNetCore.Mvc;
 using TesorosChoco.Application.DTOs.Requests;
 using TesorosChoco.Application.DTOs.Responses;
 using TesorosChoco.Application.Interfaces;
+using TesorosChoco.API.Common;
 
 namespace TesorosChoco.API.Controllers;
 
 [ApiController]
-[Route("api/auth")]
+[Route("api/v1/auth")]
 [Produces("application/json")]
 public class AuthController : ControllerBase
 {
@@ -17,19 +18,17 @@ public class AuthController : ControllerBase
     {
         _authService = authService;
         _logger = logger;
-    }
-
-    /// <summary>
+    }    /// <summary>
     /// Autentica a un usuario existente
     /// </summary>
     /// <param name="request">Datos de login del usuario</param>
     /// <returns>Información del usuario y token de acceso</returns>
     [HttpPost("login")]
-    [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request)
+    [ProducesResponseType(typeof(ApiResponse<AuthResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<AuthResponse>>> Login([FromBody] LoginRequest request)
     {
         try
         {
@@ -38,36 +37,34 @@ public class AuthController : ControllerBase
             var response = await _authService.LoginAsync(request);
             
             _logger.LogInformation("User logged in successfully: {Email}", request.Email);
-            return Ok(response);
+            return Ok(ApiResponse<AuthResponse>.SuccessResponse(response, "Login successful"));
         }
         catch (UnauthorizedAccessException ex)
         {
             _logger.LogWarning("Failed login attempt for: {Email} - {Message}", request.Email, ex.Message);
-            return Unauthorized(new { error = "Invalid credentials", message = "The provided email or password is incorrect" });
+            return Unauthorized(ApiResponse.ErrorResponse("Invalid credentials"));
         }
         catch (ArgumentException ex)
         {
             _logger.LogWarning("Invalid login request for: {Email} - {Message}", request.Email, ex.Message);
-            return BadRequest(new { error = "Invalid request", message = ex.Message });
+            return BadRequest(ApiResponse.ErrorResponse(ex.Message));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error during login for: {Email}", request.Email);
-            return StatusCode(500, new { error = "Internal server error", message = "An error occurred during login" });
+            return StatusCode(500, ApiResponse.ErrorResponse("An error occurred during login"));
         }
-    }
-
-    /// <summary>
+    }    /// <summary>
     /// Registra un nuevo usuario
     /// </summary>
     /// <param name="request">Datos del nuevo usuario</param>
     /// <returns>Información del usuario registrado y token de acceso</returns>
     [HttpPost("register")]
-    [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request)
+    [ProducesResponseType(typeof(ApiResponse<AuthResponse>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<AuthResponse>>> Register([FromBody] RegisterRequest request)
     {
         try
         {
@@ -76,7 +73,7 @@ public class AuthController : ControllerBase
             var response = await _authService.RegisterAsync(request);
             
             _logger.LogInformation("User registered successfully: {Email}", request.Email);
-            return CreatedAtAction(nameof(Register), response);
+            return CreatedAtAction(nameof(Register), ApiResponse<AuthResponse>.SuccessResponse(response, "Registration successful"));
         }
         catch (InvalidOperationException ex) when (ex.Message.Contains("already exists"))
         {

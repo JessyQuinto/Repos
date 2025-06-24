@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace TesorosChoco.API.Controllers;
 
 [ApiController]
-[Route("api/health")]
+[Route("api/v1/health")]
 [Produces("application/json")]
 public class HealthController : ControllerBase
 {
