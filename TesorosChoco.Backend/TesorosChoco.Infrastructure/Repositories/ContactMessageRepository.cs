@@ -13,9 +13,7 @@ public class ContactMessageRepository : BaseRepository<ContactMessage>, IContact
 {
     public ContactMessageRepository(TesorosChocoDbContext context) : base(context)
     {
-    }
-
-    /// <summary>
+    }    /// <summary>
     /// Create new contact message with validation and initialization
     /// </summary>
     public new async Task<ContactMessage> CreateAsync(ContactMessage contactMessage)
@@ -50,12 +48,10 @@ public class ContactMessageRepository : BaseRepository<ContactMessage>, IContact
         {
             throw new InvalidOperationException("Error creating contact message", ex);
         }
-    }
-
-    /// <summary>
+    }    /// <summary>
     /// Get all contact messages ordered by creation date (newest first)
     /// </summary>
-    public new async Task<IEnumerable<ContactMessage>> GetAllAsync()
+    public async Task<IEnumerable<ContactMessage>> GetAllAsync()
     {
         try
         {

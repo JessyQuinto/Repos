@@ -1,7 +1,7 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Jessy\\Source\\Repos\\TesorosChoco.Backend\\TesorosChoco.Infrastructure\\TesorosChoco.Infrastructure.csproj": {}
+    "c:\\Users\\Jessy\\Source\\Repos\\TesorosChoco.Backend\\TesorosChoco.Infrastructure\\TesorosChoco.Infrastructure.csproj": {}
   },
   "projects": {
     "C:\\Users\\Jessy\\Source\\Repos\\TesorosChoco.Backend\\TesorosChoco.Application\\TesorosChoco.Application.csproj": {
@@ -180,14 +180,14 @@
         }
       }
     },
-    "C:\\Users\\Jessy\\Source\\Repos\\TesorosChoco.Backend\\TesorosChoco.Infrastructure\\TesorosChoco.Infrastructure.csproj": {
+    "c:\\Users\\Jessy\\Source\\Repos\\TesorosChoco.Backend\\TesorosChoco.Infrastructure\\TesorosChoco.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Jessy\\Source\\Repos\\TesorosChoco.Backend\\TesorosChoco.Infrastructure\\TesorosChoco.Infrastructure.csproj",
+        "projectUniqueName": "c:\\Users\\Jessy\\Source\\Repos\\TesorosChoco.Backend\\TesorosChoco.Infrastructure\\TesorosChoco.Infrastructure.csproj",
         "projectName": "TesorosChoco.Infrastructure",
-        "projectPath": "C:\\Users\\Jessy\\Source\\Repos\\TesorosChoco.Backend\\TesorosChoco.Infrastructure\\TesorosChoco.Infrastructure.csproj",
+        "projectPath": "c:\\Users\\Jessy\\Source\\Repos\\TesorosChoco.Backend\\TesorosChoco.Infrastructure\\TesorosChoco.Infrastructure.csproj",
         "packagesPath": "C:\\Users\\Jessy\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Jessy\\Source\\Repos\\TesorosChoco.Backend\\TesorosChoco.Infrastructure\\obj\\",
+        "outputPath": "c:\\Users\\Jessy\\Source\\Repos\\TesorosChoco.Backend\\TesorosChoco.Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

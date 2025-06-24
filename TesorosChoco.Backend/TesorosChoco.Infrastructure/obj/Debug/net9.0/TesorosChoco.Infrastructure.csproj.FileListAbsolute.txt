@@ -12,3 +12,9 @@ C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Infrastructure\obj
 C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Infrastructure\obj\Debug\net9.0\TesorosChoco.Infrastructure.pdb
 C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Infrastructure\obj\Debug\net9.0\TesorosChoco.Infrastructure.genruntimeconfig.cache
 C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Infrastructure\obj\Debug\net9.0\ref\TesorosChoco.Infrastructure.dll
+c:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Infrastructure\obj\Debug\net9.0\TesorosChoco.Infrastructure.sourcelink.json
+c:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Infrastructure\bin\Debug\net9.0\TesorosChoco.Application.dll
+c:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Infrastructure\bin\Debug\net9.0\TesorosChoco.Domain.dll
+c:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Infrastructure\bin\Debug\net9.0\TesorosChoco.Domain.pdb
+c:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Infrastructure\bin\Debug\net9.0\TesorosChoco.Application.pdb
+c:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Infrastructure\obj\Debug\net9.0\TesorosC.43C7AF1A.Up2Date
