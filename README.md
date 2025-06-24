@@ -1,33 +1,195 @@
-# TesorosChocó Backend
+# 🍫 TesorosChoco Backend
 
-## Descripción
-Este proyecto es el backend para la aplicación TesorosChocó, desarrollado utilizando .NET 9. La arquitectura sigue el patrón Clean Architecture, separando las diferentes capas de la aplicación para una mejor organización y mantenibilidad.
+API backend para la plataforma de e-commerce de chocolates artesanales TesorosChoco, desarrollada con .NET 9 y siguiendo principios de Clean Architecture.
 
-## Estructura del Proyecto
-- **TesorosChoco.Domain**: Contiene la lógica de negocio y las entidades del dominio.
-- **TesorosChoco.Application**: Maneja la lógica de aplicación, incluyendo comandos y consultas.
-- **TesorosChoco.Infrastructure**: Implementa el acceso a datos y las integraciones con servicios externos.
-- **TesorosChoco.API**: Proporciona la interfaz de programación de aplicaciones (API) para interactuar con el backend.
+## 🚀 Configuración Rápida
 
-## Requisitos
-- .NET 9
-- SQL Server (para la base de datos)
+### Prerrequisitos
+- .NET 9 SDK
+- Docker Desktop
+- Visual Studio 2022 / VS Code (opcional)
 
-## Instalación
-1. Clona el repositorio.
-2. Navega al directorio del proyecto.
-3. Ejecuta `dotnet restore` para restaurar los paquetes NuGet.
-4. Configura la cadena de conexión en `appsettings.json`.
-5. Ejecuta `dotnet build` para compilar el proyecto.
+### Instalación Automática
 
-## Ejecución
-Para ejecutar la API, navega al directorio `TesorosChoco.API` y ejecuta:
-```
-dotnet run
+1. **Clona el repositorio:**
+```bash
+git clone <repository-url>
+cd TesorosChoco.Backend
 ```
 
-## Contribuciones
-Las contribuciones son bienvenidas. Por favor, abre un issue o envía un pull request para discutir cambios.
+2. **Ejecuta el script de configuración:**
+```powershell
+.\setup.ps1
+```
 
-## Licencia
-Este proyecto está bajo la licencia MIT.
+3. **Inicia la aplicación:**
+```bash
+dotnet run --project TesorosChoco.API
+```
+
+4. **Accede a Swagger:**
+- URL: https://localhost:5001
+- La documentación de la API estará disponible en la raíz
+
+## 🏗️ Arquitectura
+
+El proyecto sigue los principios de **Clean Architecture** con las siguientes capas:
+
+```
+📁 TesorosChoco.Backend/
+├── 📁 TesorosChoco.API/          # Capa de presentación (Web API)
+├── 📁 TesorosChoco.Application/  # Capa de aplicación (Casos de uso)
+├── 📁 TesorosChoco.Domain/       # Capa de dominio (Entidades y reglas)
+├── 📁 TesorosChoco.Infrastructure/ # Capa de infraestructura (Datos y servicios)
+└── 📁 Docs/                     # Documentación del proyecto
+```
+
+## 🛠️ Tecnologías Utilizadas
+
+- **Framework:** .NET 9
+- **Base de datos:** SQL Server 2022
+- **ORM:** Entity Framework Core 9
+- **Cache:** Redis
+- **Autenticación:** JWT Bearer Token
+- **Documentación:** Swagger/OpenAPI
+- **Logging:** Serilog
+- **Mapping:** AutoMapper
+- **Validación:** FluentValidation
+- **Testing:** xUnit (pendiente)
+
+## 🗄️ Base de Datos
+
+### Servicios incluidos en Docker Compose:
+- **SQL Server 2022:** Puerto 1433
+- **Redis:** Puerto 6379
+
+### Configuración de conexión:
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost,1433;Database=TesorosChocoDB;User Id=sa;Password=TesorosChoco123!;TrustServerCertificate=true;",
+    "IdentityConnection": "Server=localhost,1433;Database=TesorosChocoIdentityDB;User Id=sa;Password=TesorosChoco123!;TrustServerCertificate=true;",
+    "RedisConnection": "localhost:6379"
+  }
+}
+```
+
+## 🔧 Configuración Manual
+
+Si prefieres configurar manualmente:
+
+### 1. Iniciar servicios de base de datos:
+```bash
+docker-compose up -d
+```
+
+### 2. Restaurar paquetes:
+```bash
+dotnet restore
+```
+
+### 3. Compilar:
+```bash
+dotnet build
+```
+
+### 4. Ejecutar:
+```bash
+dotnet run --project TesorosChoco.API
+```
+
+## 📊 Endpoints Principales
+
+### Autenticación
+- `POST /api/auth/register` - Registro de usuario
+- `POST /api/auth/login` - Inicio de sesión
+- `POST /api/auth/refresh` - Renovar token
+
+### Productos
+- `GET /api/products` - Listar productos
+- `GET /api/products/{id}` - Obtener producto
+- `POST /api/products` - Crear producto (Admin)
+- `PUT /api/products/{id}` - Actualizar producto (Admin)
+- `DELETE /api/products/{id}` - Eliminar producto (Admin)
+
+### Categorías
+- `GET /api/categories` - Listar categorías
+- `POST /api/categories` - Crear categoría (Admin)
+
+### Carrito de Compras
+- `GET /api/cart` - Obtener carrito
+- `POST /api/cart/items` - Agregar item al carrito
+- `PUT /api/cart/items/{id}` - Actualizar cantidad
+- `DELETE /api/cart/items/{id}` - Remover item
+
+### Órdenes
+- `GET /api/orders` - Listar órdenes del usuario
+- `POST /api/orders` - Crear nueva orden
+- `GET /api/orders/{id}` - Obtener orden específica
+
+## 🔐 Autenticación y Autorización
+
+La API utiliza JWT Bearer tokens para autenticación:
+
+1. **Registrarse o hacer login** para obtener el token
+2. **Incluir el token** en el header Authorization:
+   ```
+   Authorization: Bearer <your-jwt-token>
+   ```
+
+### Roles disponibles:
+- **User:** Usuario común (puede hacer compras)
+- **Admin:** Administrador (gestión completa)
+- **Producer:** Productor (gestión de sus productos)
+
+## 🧪 Testing
+
+```bash
+# Ejecutar tests unitarios (cuando estén implementados)
+dotnet test
+```
+
+## 📝 Logging
+
+Los logs se almacenan en:
+- **Consola:** Para desarrollo
+- **Archivos:** `logs/log-YYYY-MM-DD.txt`
+
+## 🐛 Solución de Problemas
+
+### Error de conexión a SQL Server:
+1. Verificar que Docker esté ejecutándose
+2. Ejecutar: `docker-compose ps` para ver el estado
+3. Reiniciar servicios: `docker-compose restart`
+
+### Error de compilación:
+1. Limpiar solución: `dotnet clean`
+2. Restaurar paquetes: `dotnet restore`
+3. Compilar: `dotnet build`
+
+### Puerto ocupado:
+1. Cambiar el puerto en `launchSettings.json`
+2. O terminar el proceso que usa el puerto 5001
+
+## 🤝 Contribución
+
+1. Fork el proyecto
+2. Crear rama para feature (`git checkout -b feature/AmazingFeature`)
+3. Commit cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abrir Pull Request
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
+
+## 📞 Soporte
+
+Si tienes problemas o preguntas:
+1. Revisa la [documentación](./Docs/)
+2. Crea un [issue](../../issues)
+3. Contacta al equipo de desarrollo
+
+---
+
+**¡Disfruta desarrollando con TesorosChoco! 🍫**

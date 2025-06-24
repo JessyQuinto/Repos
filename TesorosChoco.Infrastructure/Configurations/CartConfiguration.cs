@@ -5,17 +5,16 @@ using TesorosChoco.Domain.Entities;
 namespace TesorosChoco.Infrastructure.Configurations;
 
 public class CartConfiguration : IEntityTypeConfiguration<Cart>
-{
-    public void Configure(EntityTypeBuilder<Cart> builder)
+{    public void Configure(EntityTypeBuilder<Cart> builder)
     {
         builder.HasKey(c => c.Id);
 
         builder.Property(c => c.UserId)
             .IsRequired();
 
-        builder.Property(c => c.Total)
-            .IsRequired()
-            .HasColumnType("decimal(18,2)");
+        // Ignore computed properties (they are calculated from items)
+        builder.Ignore(c => c.Total);
+        builder.Ignore(c => c.TotalItems);
 
         builder.Property(c => c.CreatedAt)
             .IsRequired();

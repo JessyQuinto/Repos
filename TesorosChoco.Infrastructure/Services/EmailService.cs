@@ -1,237 +1,213 @@
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System.Net;
 using System.Net.Mail;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace TesorosChoco.Infrastructure.Services;
 
 /// <summary>
-/// Email service for sending notifications, confirmations, and marketing emails
-/// Configurable for different providers (SMTP, SendGrid, etc.)
+/// Email service for sending various types of emails
+/// Simple text-based email service for backend API
+/// HTML templates should be handled by frontend or separate template service
 /// </summary>
 public interface IEmailService
 {
-    Task SendEmailAsync(string to, string subject, string body, bool isHtml = true);
-    Task SendEmailConfirmationAsync(string to, string confirmationLink);
-    Task SendPasswordResetAsync(string to, string resetLink);
-    Task SendOrderConfirmationAsync(string to, string orderNumber, decimal total);
-    Task SendContactMessageConfirmationAsync(string to, string name);
+    Task<bool> SendEmailAsync(string to, string subject, string body, bool isHtml = false);
+    Task<bool> SendEmailConfirmationAsync(string email, string firstName, string confirmationToken);
+    Task<bool> SendPasswordResetAsync(string email, string firstName, string resetToken);
+    Task<bool> SendWelcomeEmailAsync(string email, string firstName);
+    Task<bool> SendOrderConfirmationAsync(string email, string firstName, string orderNumber, decimal total);
+    Task<bool> SendContactFormNotificationAsync(string adminEmail, string customerName, string customerEmail, string message);
+    Task<bool> SendContactMessageConfirmationAsync(string email, string customerName);
 }
 
 public class EmailService : IEmailService
 {
-    private readonly EmailConfiguration _config;
+    private readonly IConfiguration _configuration;
     private readonly ILogger<EmailService> _logger;
+    private readonly string _smtpHost;
+    private readonly int _smtpPort;
+    private readonly string _smtpUsername;
+    private readonly string _smtpPassword;
+    private readonly string _fromEmail;
+    private readonly string _fromName;
+    private readonly bool _enableSsl;
 
-    public EmailService(IOptions<EmailConfiguration> config, ILogger<EmailService> logger)
+    public EmailService(IConfiguration configuration, ILogger<EmailService> logger)
     {
-        _config = config.Value;
+        _configuration = configuration;
         _logger = logger;
+
+        _smtpHost = configuration["Email:SmtpHost"] ?? "smtp.gmail.com";
+        _smtpPort = int.Parse(configuration["Email:SmtpPort"] ?? "587");
+        _smtpUsername = configuration["Email:SmtpUsername"] ?? throw new InvalidOperationException("SMTP Username not configured");
+        _smtpPassword = configuration["Email:SmtpPassword"] ?? throw new InvalidOperationException("SMTP Password not configured");
+        _fromEmail = configuration["Email:FromEmail"] ?? _smtpUsername;
+        _fromName = configuration["Email:FromName"] ?? "Tesoros del Chocó";
+        _enableSsl = bool.Parse(configuration["Email:EnableSsl"] ?? "true");
     }
 
-    public async Task SendEmailAsync(string to, string subject, string body, bool isHtml = true)
+    public async Task<bool> SendEmailAsync(string to, string subject, string body, bool isHtml = false)
     {
         try
         {
-            using var client = new SmtpClient(_config.SmtpHost, _config.SmtpPort)
-            {
-                EnableSsl = _config.EnableSsl,
-                Credentials = new NetworkCredential(_config.Username, _config.Password)
-            };
+            using var client = new SmtpClient(_smtpHost, _smtpPort);
+            client.EnableSsl = _enableSsl;
+            client.Credentials = new NetworkCredential(_smtpUsername, _smtpPassword);
 
-            var mailMessage = new MailMessage
-            {
-                From = new MailAddress(_config.FromEmail, _config.FromName),
-                Subject = subject,
-                Body = body,
-                IsBodyHtml = isHtml
-            };
+            using var message = new MailMessage();
+            message.From = new MailAddress(_fromEmail, _fromName);
+            message.To.Add(new MailAddress(to));
+            message.Subject = subject;
+            message.Body = body;
+            message.IsBodyHtml = isHtml;
 
-            mailMessage.To.Add(to);
-
-            await client.SendMailAsync(mailMessage);
-            _logger.LogInformation("Email sent successfully to {To} with subject: {Subject}", to, subject);
+            await client.SendMailAsync(message);
+            
+            _logger.LogInformation("Email sent successfully to {Email}", to);
+            return true;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to send email to {To} with subject: {Subject}", to, subject);
-            throw;
+            _logger.LogError(ex, "Failed to send email to {Email}", to);
+            return false;
         }
-    }    public async Task SendEmailConfirmationAsync(string to, string confirmationLink)
-    {
-        var subject = "Confirma tu cuenta - Tesoros del Chocó";
-        var body = $@"
-            <html>
-            <head>
-                <style>
-                    body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-                    .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-                    .header {{ background: linear-gradient(135deg, #8B4513, #A0522D); color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }}
-                    .content {{ background: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; }}
-                    .button {{ display: inline-block; background: #8B4513; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 20px 0; }}
-                    .footer {{ text-align: center; margin-top: 20px; font-size: 12px; color: #666; }}
-                </style>
-            </head>
-            <body>
-                <div class=""container"">
-                    <div class=""header"">
-                        <h1>¡Bienvenido a Tesoros del Chocó!</h1>
-                    </div>
-                    <div class=""content"">
-                        <p>Gracias por registrarte en nuestra plataforma. Para completar tu registro, por favor confirma tu dirección de correo electrónico haciendo clic en el siguiente enlace:</p>
-                        
-                        <div style=""text-align: center;"">
-                            <a href=""{confirmationLink}"" class=""button"">Confirmar Email</a>
-                        </div>
-                        
-                        <p>Si no puedes hacer clic en el botón, copia y pega el siguiente enlace en tu navegador:</p>
-                        <p style=""word-break: break-all; background: #e9e9e9; padding: 10px; border-radius: 4px;"">{confirmationLink}</p>
-                        
-                        <p>Este enlace expirará en 24 horas por razones de seguridad.</p>
-                        
-                        <p>Si no creaste esta cuenta, puedes ignorar este correo.</p>
-                    </div>
-                    <div class=""footer"">
-                        <p>© 2025 Tesoros del Chocó. Todos los derechos reservados.</p>
-                    </div>
-                </div>
-            </body>
-            </html>";
-
-        await SendEmailAsync(to, subject, body);
     }
 
-    public async Task SendPasswordResetAsync(string to, string resetLink)
+    public async Task<bool> SendEmailConfirmationAsync(string email, string firstName, string confirmationToken)
     {
-        var subject = "Restablece tu contraseña - Tesoros del Chocó";
-        var body = $"""
-            <html>
-            <head>
-                <style>
-                    body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-                    .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-                    .header {{ background: linear-gradient(135deg, #8B4513, #A0522D); color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }}
-                    .content {{ background: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; }}
-                    .button {{ display: inline-block; background: #8B4513; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 20px 0; }}
-                    .warning {{ background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 4px; margin: 20px 0; }}
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <div class="header">
-                        <h1>Restablece tu contraseña</h1>
-                    </div>
-                    <div class="content">
-                        <p>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en Tesoros del Chocó.</p>
-                        
-                        <div style="text-align: center;">
-                            <a href="{resetLink}" class="button">Restablecer Contraseña</a>
-                        </div>
-                        
-                        <p>Si no puedes hacer clic en el botón, copia y pega el siguiente enlace en tu navegador:</p>
-                        <p style="word-break: break-all; background: #e9e9e9; padding: 10px; border-radius: 4px;">{resetLink}</p>
-                        
-                        <div class="warning">
-                            <strong>Importante:</strong> Este enlace expirará en 1 hora por razones de seguridad. Si no solicitaste este cambio, puedes ignorar este correo de forma segura.
-                        </div>
-                    </div>
-                    <div class="footer">
-                        <p>© 2025 Tesoros del Chocó. Todos los derechos reservados.</p>
-                    </div>
-                </div>
-            </body>
-            </html>
-            """;
+        var subject = "Confirma tu dirección de correo electrónico - Tesoros del Chocó";
+        var body = $@"Hola {firstName},
 
-        await SendEmailAsync(to, subject, body);
+¡Bienvenido a Tesoros del Chocó!
+
+Para completar tu registro, por favor usa el siguiente código de confirmación:
+
+Código de confirmación: {confirmationToken}
+
+Este código expirará en 24 horas por razones de seguridad.
+
+Si no creaste esta cuenta, puedes ignorar este correo.
+
+Saludos cordiales,
+El equipo de Tesoros del Chocó
+
+© 2025 Tesoros del Chocó. Todos los derechos reservados.";
+        
+        return await SendEmailAsync(email, subject, body);
     }
 
-    public async Task SendOrderConfirmationAsync(string to, string orderNumber, decimal total)
+    public async Task<bool> SendPasswordResetAsync(string email, string firstName, string resetToken)
+    {
+        var subject = "Código para restablecer contraseña - Tesoros del Chocó";
+        var body = $@"Hola {firstName},
+
+Recibimos una solicitud para restablecer la contraseña de tu cuenta en Tesoros del Chocó.
+
+Usa el siguiente código para restablecer tu contraseña:
+
+Código de restablecimiento: {resetToken}
+
+Este código expirará en 1 hora por razones de seguridad.
+
+Si no solicitaste este cambio, puedes ignorar este correo. Tu contraseña seguirá siendo la misma.
+
+Saludos cordiales,
+El equipo de Tesoros del Chocó
+
+© 2025 Tesoros del Chocó. Todos los derechos reservados.";
+        
+        return await SendEmailAsync(email, subject, body);
+    }
+
+    public async Task<bool> SendWelcomeEmailAsync(string email, string firstName)
+    {
+        var subject = "¡Bienvenido a Tesoros del Chocó!";
+        var body = $@"Hola {firstName},
+
+¡Bienvenido a Tesoros del Chocó!
+
+Tu cuenta ha sido creada exitosamente. Ahora puedes:
+- Explorar nuestros productos artesanales únicos del Chocó
+- Realizar pedidos de manera segura
+- Seguir el estado de tus envíos
+- Contactar directamente con nuestros artesanos
+
+Gracias por unirte a nuestra comunidad.
+
+Saludos cordiales,
+El equipo de Tesoros del Chocó
+
+© 2025 Tesoros del Chocó. Todos los derechos reservados.";
+        
+        return await SendEmailAsync(email, subject, body);
+    }
+
+    public async Task<bool> SendOrderConfirmationAsync(string email, string firstName, string orderNumber, decimal total)
     {
         var subject = $"Confirmación de pedido #{orderNumber} - Tesoros del Chocó";
-        var body = $"""
-            <html>
-            <head>
-                <style>
-                    body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-                    .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-                    .header {{ background: linear-gradient(135deg, #8B4513, #A0522D); color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }}
-                    .content {{ background: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; }}
-                    .order-info {{ background: white; padding: 20px; border-radius: 4px; margin: 20px 0; }}
-                    .total {{ font-size: 18px; font-weight: bold; color: #8B4513; }}
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <div class="header">
-                        <h1>¡Pedido Confirmado!</h1>
-                    </div>
-                    <div class="content">
-                        <p>Gracias por tu pedido en Tesoros del Chocó. Hemos recibido tu orden y la estamos procesando.</p>
-                        
-                        <div class="order-info">
-                            <h3>Detalles del pedido:</h3>
-                            <p><strong>Número de pedido:</strong> #{orderNumber}</p>
-                            <p><strong>Total:</strong> <span class="total">${total:N0} COP</span></p>
-                            <p><strong>Fecha:</strong> {DateTime.Now:dd/MM/yyyy HH:mm}</p>
-                        </div>
-                        
-                        <p>Te notificaremos cuando tu pedido sea enviado. Puedes hacer seguimiento de tu pedido en tu cuenta.</p>
-                        
-                        <p>Si tienes alguna pregunta sobre tu pedido, no dudes en contactarnos.</p>
-                    </div>
-                    <div class="footer">
-                        <p>© 2025 Tesoros del Chocó. Todos los derechos reservados.</p>
-                    </div>
-                </div>
-            </body>
-            </html>
-            """;
+        var body = $@"Hola {firstName},
 
-        await SendEmailAsync(to, subject, body);
+¡Gracias por tu pedido!
+
+Detalles del pedido:
+- Número de pedido: #{orderNumber}
+- Total: ${total:N0} COP
+- Fecha: {DateTime.Now:dd/MM/yyyy HH:mm}
+
+Tu pedido ha sido recibido y está siendo procesado.
+
+Te notificaremos cuando tu pedido sea enviado.
+
+Puedes consultar el estado de tu pedido en cualquier momento desde tu cuenta.
+
+Saludos cordiales,
+El equipo de Tesoros del Chocó
+
+© 2025 Tesoros del Chocó. Todos los derechos reservados.";
+        
+        return await SendEmailAsync(email, subject, body);
     }
 
-    public async Task SendContactMessageConfirmationAsync(string to, string name)
+    public async Task<bool> SendContactFormNotificationAsync(string adminEmail, string customerName, string customerEmail, string message)
+    {
+        var subject = "Nuevo mensaje de contacto - Tesoros del Chocó";
+        var body = $@"Nuevo mensaje de contacto recibido:
+
+Nombre: {customerName}
+Email: {customerEmail}
+Fecha: {DateTime.Now:dd/MM/yyyy HH:mm}
+
+Mensaje:
+{message}
+
+Responder a: {customerEmail}";
+        
+        return await SendEmailAsync(adminEmail, subject, body);
+    }
+
+    public async Task<bool> SendContactMessageConfirmationAsync(string email, string customerName)
     {
         var subject = "Hemos recibido tu mensaje - Tesoros del Chocó";
-        var body = $"""
-            <html>
-            <head>
-                <style>
-                    body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-                    .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-                    .header {{ background: linear-gradient(135deg, #8B4513, #A0522D); color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }}
-                    .content {{ background: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; }}
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <div class="header">
-                        <h1>Mensaje Recibido</h1>
-                    </div>
-                    <div class="content">
-                        <p>Hola {name},</p>
-                        
-                        <p>Gracias por contactarnos. Hemos recibido tu mensaje y nuestro equipo lo revisará pronto.</p>
-                        
-                        <p>Nos pondremos en contacto contigo en las próximas 24-48 horas.</p>
-                        
-                        <p>¡Gracias por tu interés en Tesoros del Chocó!</p>
-                    </div>
-                    <div class="footer">
-                        <p>© 2025 Tesoros del Chocó. Todos los derechos reservados.</p>
-                    </div>
-                </div>
-            </body>
-            </html>
-            """;
+        var body = $@"Hola {customerName},
 
-        await SendEmailAsync(to, subject, body);
+Gracias por contactarnos. Hemos recibido tu mensaje y nuestro equipo lo revisará pronto.
+
+Nos pondremos en contacto contigo en las próximas 24-48 horas.
+
+¡Gracias por tu interés en Tesoros del Chocó!
+
+Saludos cordiales,
+El equipo de Tesoros del Chocó
+
+© 2025 Tesoros del Chocó. Todos los derechos reservados.";
+        
+        return await SendEmailAsync(email, subject, body);
     }
 }
 
 /// <summary>
-/// Email configuration settings
+/// Email configuration settings for dependency injection
 /// </summary>
 public class EmailConfiguration
 {
