@@ -24,10 +24,8 @@ public class CartItemConfiguration : IEntityTypeConfiguration<CartItem>
         builder.HasOne(ci => ci.Cart)
             .WithMany(c => c.Items)
             .HasForeignKey(ci => ci.CartId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasOne(ci => ci.Product)
-            .WithMany()
+            .OnDelete(DeleteBehavior.Cascade);        builder.HasOne(ci => ci.Product)
+            .WithMany(p => p.CartItems)
             .HasForeignKey(ci => ci.ProductId)
             .OnDelete(DeleteBehavior.Restrict);
     }

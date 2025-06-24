@@ -24,10 +24,8 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
         builder.HasOne(oi => oi.Order)
             .WithMany(o => o.Items)
             .HasForeignKey(oi => oi.OrderId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasOne(oi => oi.Product)
-            .WithMany()
+            .OnDelete(DeleteBehavior.Cascade);        builder.HasOne(oi => oi.Product)
+            .WithMany(p => p.OrderItems)
             .HasForeignKey(oi => oi.ProductId)
             .OnDelete(DeleteBehavior.Restrict);
     }
