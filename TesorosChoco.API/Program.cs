@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using TesorosChoco.Infrastructure;
 using TesorosChoco.Application;
+using TesorosChoco.API.Middlewares;
 using Serilog;
 using FluentValidation.AspNetCore;
 
@@ -23,10 +24,18 @@ try
     var builder = WebApplication.CreateBuilder(args);
 
     // Add Serilog
-    builder.Host.UseSerilog();
-
-    // Add services to the container
+    builder.Host.UseSerilog();    // Add services to the container
     builder.Services.AddControllers();
+
+    // Add Problem Details (para manejo de errores)
+    builder.Services.AddProblemDetails(options =>
+    {
+        options.CustomizeProblemDetails = (context) =>
+        {
+            context.ProblemDetails.Instance = context.HttpContext.Request.Path;
+            context.ProblemDetails.Extensions.TryAdd("traceId", context.HttpContext.TraceIdentifier);
+        };
+    });
     
     // Add FluentValidation
     builder.Services.AddFluentValidationAutoValidation()
@@ -45,14 +54,16 @@ try
     {
         setup.GroupNameFormat = "'v'VVV";
         setup.SubstituteApiVersionInUrl = true;
-    });
-
-    // Add CORS
+    });    // Add CORS
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("AllowFrontend", policy =>
         {
-            policy.WithOrigins("http://localhost:3000", "https://localhost:3000") // React app URLs
+            policy.WithOrigins(
+                    "http://localhost:3000", "https://localhost:3000", // React app URLs
+                    "http://localhost:8080", "https://localhost:8080", // Vite default URLs
+                    "http://localhost:5173", "https://localhost:5173"  // Vite alternative URLs
+                  )
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();
@@ -99,9 +110,7 @@ try
     var app = builder.Build();
 
     // Ensure database is created and seeded
-    await app.Services.EnsureDatabaseCreatedAsync();
-
-    // Configure the HTTP request pipeline
+    await app.Services.EnsureDatabaseCreatedAsync();    // Configure the HTTP request pipeline
     if (app.Environment.IsDevelopment())
     {
         app.UseDeveloperExceptionPage();
@@ -114,7 +123,7 @@ try
     }
     else
     {
-        app.UseExceptionHandler("/Home/Error");
+        app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
         app.UseHsts();
     }
 

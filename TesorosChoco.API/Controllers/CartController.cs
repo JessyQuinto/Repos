@@ -7,7 +7,7 @@ using TesorosChoco.Application.Interfaces;
 namespace TesorosChoco.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/cart")]
 [Authorize]
 [Produces("application/json")]
 public class CartController : ControllerBase

@@ -6,7 +6,7 @@ using TesorosChoco.Application.Interfaces;
 namespace TesorosChoco.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/auth")]
 [Produces("application/json")]
 public class AuthController : ControllerBase
 {

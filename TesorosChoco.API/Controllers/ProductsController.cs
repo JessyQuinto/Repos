@@ -8,7 +8,7 @@ using TesorosChoco.Application.Interfaces;
 namespace TesorosChoco.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/products")]
 [Produces("application/json")]
 public class ProductsController : ControllerBase
 {

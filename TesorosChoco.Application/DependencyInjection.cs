@@ -31,6 +31,7 @@ public static class DependencyInjection
         services.AddScoped<ICartService, CartService>();
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IContactService, ContactService>();
+        services.AddScoped<INewsletterService, NewsletterService>();
 
         return services;
     }
