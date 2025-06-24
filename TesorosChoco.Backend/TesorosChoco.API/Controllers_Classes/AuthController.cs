@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TesorosChoco.Application.DTOs;
 using TesorosChoco.Application.DTOs.Auth;
 using TesorosChoco.Application.Interfaces;
 

@@ -45,45 +45,37 @@ public class CartController : ControllerBase
             _logger.LogError(ex, "Error getting cart");
             return StatusCode(500, new { error = "Internal server error", message = "An error occurred while getting the cart" });
         }
-    }
-
-    /// <summary>
-    /// Agrega un producto al carrito
+    }    /// <summary>
+    /// Actualiza el carrito del usuario (agregar/modificar items)
     /// </summary>
-    /// <param name="request">Información del producto a agregar</param>
+    /// <param name="request">Datos del carrito a actualizar</param>
     /// <returns>Carrito actualizado</returns>
-    [HttpPost("add")]
+    [HttpPost]
     [ProducesResponseType(typeof(CartDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<CartDto>> AddToCart([FromBody] AddToCartRequest request)
+    public async Task<ActionResult<CartDto>> UpdateCart([FromBody] UpdateCartRequest request)
     {
         try
         {
             var userId = GetCurrentUserId();
-            _logger.LogInformation("Adding product {ProductId} to cart for user {UserId}", request.ProductId, userId);
+            _logger.LogInformation("Updating cart for user: {UserId}", userId);
             
-            var cart = await _cartService.AddToCartAsync(userId, request);
+            var cart = await _cartService.UpdateCartAsync(userId, request);
             
-            _logger.LogInformation("Product {ProductId} added to cart successfully", request.ProductId);
+            _logger.LogInformation("Cart updated successfully for user: {UserId}", userId);
             return Ok(cart);
         }
         catch (ArgumentException ex)
         {
-            _logger.LogWarning("Failed to add to cart: {Message}", ex.Message);
+            _logger.LogWarning("Failed to update cart: {Message}", ex.Message);
             return BadRequest(new { error = "Invalid request", message = ex.Message });
-        }
-        catch (InvalidOperationException ex)
-        {
-            _logger.LogWarning("Failed to add to cart: {Message}", ex.Message);
-            return NotFound(new { error = "Product not found", message = ex.Message });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error adding to cart");
-            return StatusCode(500, new { error = "Internal server error", message = "An error occurred while adding to cart" });
+            _logger.LogError(ex, "Error updating cart");
+            return StatusCode(500, new { error = "Internal server error", message = "An error occurred while updating cart" });
         }
     }
 
