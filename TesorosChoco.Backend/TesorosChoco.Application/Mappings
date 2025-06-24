@@ -1,1 +1,50 @@
-// This file is intentionally left blank.
+using AutoMapper;
+using TesorosChoco.Application.DTOs;
+using TesorosChoco.Application.DTOs.Auth;
+using TesorosChoco.Domain.Entities;
+
+namespace TesorosChoco.Application.Mappings;
+
+public class MappingProfile : Profile
+{
+    public MappingProfile()
+    {
+        // User mappings
+        CreateMap<User, UserDto>()
+            .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName))
+            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
+            .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.PhoneNumber));
+
+        CreateMap<RegisterRequest, User>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
+            .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Phone))
+            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+            .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
+
+        // Product mappings
+        CreateMap<Product, ProductDto>()
+            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : string.Empty))
+            .ForMember(dest => dest.ProducerName, opt => opt.MapFrom(src => src.Producer != null ? src.Producer.Name : string.Empty))
+            .ForMember(dest => dest.CurrentPrice, opt => opt.MapFrom(src => src.DiscountedPrice ?? src.Price))
+            .ForMember(dest => dest.HasDiscount, opt => opt.MapFrom(src => src.DiscountedPrice.HasValue))
+            .ForMember(dest => dest.IsInStock, opt => opt.MapFrom(src => src.Stock > 0));
+
+        // Category mappings
+        CreateMap<Category, CategoryDto>();
+
+        // Producer mappings
+        CreateMap<Producer, ProducerDto>();
+
+        // Cart mappings
+        CreateMap<Cart, CartDto>()
+            .ForMember(dest => dest.Total, opt => opt.MapFrom(src => src.Items.Sum(item => item.Quantity * item.Price)));
+
+        CreateMap<CartItem, CartItemDto>();
+
+        // Order mappings
+        CreateMap<Order, OrderDto>();
+
+        CreateMap<OrderItem, OrderItemDto>();
+    }
+}

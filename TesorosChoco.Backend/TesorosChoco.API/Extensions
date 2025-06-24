@@ -1,1 +1,111 @@
-// This file is intentionally left blank.
+using Microsoft.Extensions.DependencyInjection;
+using TesorosChoco.Application.Interfaces;
+using TesorosChoco.Application.Services;
+using TesorosChoco.Application.Mappings;
+
+namespace TesorosChoco.API.Extensions;
+
+public static class ServiceCollectionExtensions
+{
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+    {
+        // AutoMapper
+        services.AddAutoMapper(typeof(MappingProfile));
+
+        // Application Services
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IProductService, ProductService>();
+        services.AddScoped<ICategoryService, CategoryService>();
+        services.AddScoped<IProducerService, ProducerService>();
+        services.AddScoped<ICartService, CartService>();
+        services.AddScoped<IOrderService, OrderService>();
+        services.AddScoped<IContactService, ContactService>();
+        services.AddScoped<INewsletterService, NewsletterService>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddDomainServices(this IServiceCollection services)
+    {
+        // Domain Services
+        services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<IPasswordService, PasswordService>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddApiConfiguration(this IServiceCollection services)
+    {
+        // API Documentation
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+            {
+                Title = "TesorosChocó API",
+                Version = "v1",
+                Description = "API para la plataforma de comercio electrónico TesorosChocó",
+                Contact = new Microsoft.OpenApi.Models.OpenApiContact
+                {
+                    Name = "TesorosChocó Team",
+                    Email = "contact@tesoroschoco.com"
+                }
+            });
+
+            // Configure JWT authentication in Swagger
+            c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                Name = "Authorization",
+                In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+                Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+                Scheme = "Bearer"
+            });
+
+            c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+            {
+                {
+                    new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                    {
+                        Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                        {
+                            Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    new string[] {}
+                }
+            });
+        });
+
+        // CORS Configuration
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowFrontend", policy =>
+            {
+                policy.WithOrigins(
+                    "http://localhost:3000",  // React dev
+                    "http://localhost:8080",  // Vue dev
+                    "https://localhost:3000", // React dev HTTPS
+                    "https://localhost:8080"  // Vue dev HTTPS
+                )
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+            });
+        });
+
+        // Problem Details for better error handling
+        services.AddProblemDetails(options =>
+        {
+            options.CustomizeProblemDetails = (context) =>
+            {
+                context.ProblemDetails.Instance = context.HttpContext.Request.Path;
+                context.ProblemDetails.Extensions.TryAdd("traceId", context.HttpContext.TraceIdentifier);
+            };
+        });
+
+        return services;
+    }
+}

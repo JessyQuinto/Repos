@@ -14,6 +14,11 @@ public class User : IdentityUser<int>
     
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     
+    // Authentication properties
+    public string? RefreshToken { get; set; }
+    
+    public DateTime? RefreshTokenExpiryTime { get; set; }
+    
     // Navigation Properties
     public virtual Cart? Cart { get; set; }
     
