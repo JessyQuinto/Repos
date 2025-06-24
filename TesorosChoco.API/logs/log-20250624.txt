@@ -699,3 +699,58 @@ VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9);
 2025-06-24 14:39:31.510 -05:00 [INF] Executed action TesorosChoco.API.Controllers.AuthController.Register (TesorosChoco.API) in 713.8102ms
 2025-06-24 14:39:31.512 -05:00 [INF] Executed endpoint 'TesorosChoco.API.Controllers.AuthController.Register (TesorosChoco.API)'
 2025-06-24 14:39:31.519 -05:00 [INF] Request finished HTTP/1.1 POST http://localhost:5000/api/v1/auth/register - 201 null application/json; charset=utf-8 836.3528ms
+2025-06-24 14:59:42.420 -05:00 [INF] Starting TesorosChoco API
+2025-06-24 14:59:45.001 -05:00 [INF] Executed DbCommand (27ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2025-06-24 14:59:45.051 -05:00 [INF] Executed DbCommand (29ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+
+IF EXISTS
+    (SELECT *
+     FROM [sys].[objects] o
+     WHERE [o].[type] = 'U'
+     AND [o].[is_ms_shipped] = 0
+     AND NOT EXISTS (SELECT *
+         FROM [sys].[extended_properties] AS [ep]
+         WHERE [ep].[major_id] = [o].[object_id]
+             AND [ep].[minor_id] = 0
+             AND [ep].[class] = 1
+             AND [ep].[name] = N'microsoft_database_tools_support'
+    )
+)
+SELECT 1 ELSE SELECT 0
+2025-06-24 14:59:45.162 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2025-06-24 14:59:45.170 -05:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+
+IF EXISTS
+    (SELECT *
+     FROM [sys].[objects] o
+     WHERE [o].[type] = 'U'
+     AND [o].[is_ms_shipped] = 0
+     AND NOT EXISTS (SELECT *
+         FROM [sys].[extended_properties] AS [ep]
+         WHERE [ep].[major_id] = [o].[object_id]
+             AND [ep].[minor_id] = 0
+             AND [ep].[class] = 1
+             AND [ep].[name] = N'microsoft_database_tools_support'
+    )
+)
+SELECT 1 ELSE SELECT 0
+2025-06-24 14:59:45.558 -05:00 [INF] Executed DbCommand (17ms) [Parameters=[@__normalizedName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [r].[Id], [r].[ConcurrencyStamp], [r].[Name], [r].[NormalizedName]
+FROM [Roles] AS [r]
+WHERE [r].[NormalizedName] = @__normalizedName_0
+2025-06-24 14:59:45.632 -05:00 [INF] Executed DbCommand (5ms) [Parameters=[@__normalizedName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [r].[Id], [r].[ConcurrencyStamp], [r].[Name], [r].[NormalizedName]
+FROM [Roles] AS [r]
+WHERE [r].[NormalizedName] = @__normalizedName_0
+2025-06-24 14:59:45.639 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [r].[Id], [r].[ConcurrencyStamp], [r].[Name], [r].[NormalizedName]
+FROM [Roles] AS [r]
+WHERE [r].[NormalizedName] = @__normalizedName_0
+2025-06-24 14:59:45.811 -05:00 [INF] TesorosChoco API started successfully
+2025-06-24 14:59:45.834 -05:00 [INF] User profile is available. Using 'C:\Users\Jessy\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-06-24 14:59:45.977 -05:00 [INF] Now listening on: http://localhost:5000
+2025-06-24 14:59:45.983 -05:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-06-24 14:59:45.986 -05:00 [INF] Hosting environment: Development
+2025-06-24 14:59:45.988 -05:00 [INF] Content root path: C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.API
