@@ -1,5 +1,4 @@
 using TesorosChoco.Domain.Entities;
-using TesorosChoco.Application.DTOs.Parameters;
 
 namespace TesorosChoco.Domain.Interfaces;
 
@@ -11,7 +10,7 @@ public interface IProductRepository
     Task<IEnumerable<Product>> GetFeaturedAsync();
     Task<IEnumerable<Product>> GetByCategoryIdAsync(int categoryId);
     Task<IEnumerable<Product>> GetByProducerIdAsync(int producerId);
-    Task<(IEnumerable<Product> Products, int Total)> SearchAsync(ProductSearchParameters parameters);
+    Task<(IEnumerable<Product> Products, int Total)> SearchAsync(string? searchTerm = null, int? categoryId = null, int? producerId = null, decimal? minPrice = null, decimal? maxPrice = null, bool? featured = null, int page = 1, int limit = 10, string sortBy = "name", string sortOrder = "asc");
     Task<Product> CreateAsync(Product product);
     Task<Product> UpdateAsync(Product product);
     Task DeleteAsync(int id);

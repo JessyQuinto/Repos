@@ -10,3 +10,4 @@ C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Domain\obj\Debug\n
 C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Domain\obj\Debug\net9.0\refint\TesorosChoco.Domain.dll
 C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Domain\obj\Debug\net9.0\TesorosChoco.Domain.pdb
 C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Domain\obj\Debug\net9.0\ref\TesorosChoco.Domain.dll
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Domain\obj\Debug\net9.0\TesorosChoco.Domain.sourcelink.json

@@ -13,3 +13,4 @@ C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Application\obj\De
 C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Application\obj\Debug\net9.0\refint\TesorosChoco.Application.dll
 C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Application\obj\Debug\net9.0\TesorosChoco.Application.pdb
 C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Application\obj\Debug\net9.0\ref\TesorosChoco.Application.dll
+C:\Users\Jessy\Source\Repos\TesorosChoco.Backend\TesorosChoco.Application\obj\Debug\net9.0\TesorosChoco.Application.sourcelink.json
