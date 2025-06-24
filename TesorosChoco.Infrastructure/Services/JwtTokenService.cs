@@ -25,19 +25,17 @@ public class JwtTokenService : IJwtTokenService
     private readonly string _issuer;
     private readonly string _audience;
     private readonly int _accessTokenExpirationMinutes;
-    private readonly int _refreshTokenExpirationDays;
-
-    public JwtTokenService(IConfiguration configuration)
+    private readonly int _refreshTokenExpirationDays;    public JwtTokenService(IConfiguration configuration)
     {
         _configuration = configuration;
-        _secretKey = configuration["Jwt:SecretKey"] 
-            ?? throw new InvalidOperationException("JWT SecretKey is not configured");
+        _secretKey = configuration["Jwt:Key"] 
+            ?? throw new InvalidOperationException("JWT Key is not configured");
         _issuer = configuration["Jwt:Issuer"] 
             ?? throw new InvalidOperationException("JWT Issuer is not configured");
         _audience = configuration["Jwt:Audience"] 
             ?? throw new InvalidOperationException("JWT Audience is not configured");
         
-        _accessTokenExpirationMinutes = int.Parse(configuration["Jwt:AccessTokenExpirationMinutes"] ?? "60");
+        _accessTokenExpirationMinutes = int.Parse(configuration["Jwt:DurationInMinutes"] ?? "60");
         _refreshTokenExpirationDays = int.Parse(configuration["Jwt:RefreshTokenExpirationDays"] ?? "7");
     }
 
