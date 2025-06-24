@@ -286,37 +286,9 @@ public class ProductsController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting featured products");
-            return StatusCode(500, new { 
+            _logger.LogError(ex, "Error getting featured products");            return StatusCode(500, new { 
                 error = "Internal server error", 
                 message = "An error occurred while getting featured products" 
-            });
-        }
-    }    /// <summary>
-    /// Obtiene productos por categoría
-    /// </summary>
-    /// <param name="categoryId">ID de la categoría</param>
-    /// <returns>Lista de productos de la categoría</returns>
-    [HttpGet("category/{categoryId}")]
-    [ProducesResponseType(typeof(IEnumerable<ProductDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    [Obsolete("Use /api/categories/{categoryId}/products instead")]
-    public async Task<ActionResult<IEnumerable<ProductDto>>> GetProductsByCategory(int categoryId)
-    {
-        try
-        {
-            var query = new GetProductsByCategoryQuery(categoryId);
-            var products = await _mediator.Send(query);
-            
-            return Ok(products);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting products for category {CategoryId}", categoryId);
-            return StatusCode(500, new { 
-                error = "Internal server error", 
-                message = "An error occurred while getting products for the category" 
             });
         }
     }
