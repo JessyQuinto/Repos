@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: tesoroschoco-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=TesorosChoco123!
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    restart: unless-stopped
+    networks:
+      - tesoroschoco-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: tesoroschoco-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - tesoroschoco-network
+
+volumes:
+  sqlserver_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  tesoroschoco-network:
+    driver: bridge
