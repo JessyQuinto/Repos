@@ -127,9 +127,11 @@ public static class DependencyInjection
         
         // Unit of Work
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-        
-        // Inventory Management
+          // Inventory Management
         services.AddScoped<IInventoryService, InventoryService>();
+
+        // Background Services
+        services.AddHostedService<StockReservationCleanupService>();
 
         // Repository Registration
         // services.AddScoped(typeof(IRepository<>), typeof(BaseRepository<>));

@@ -7,6 +7,7 @@ public class CreateOrderRequest
     public ShippingAddressRequest ShippingAddress { get; set; } = new();
     public string PaymentMethod { get; set; } = string.Empty;
     public decimal Total { get; set; }
+    public DateTime? RequestedDeliveryDate { get; set; } // Added for time and region validation
 }
 
 public class OrderItemRequest
@@ -21,6 +22,7 @@ public class ShippingAddressRequest
     public string Name { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;
+    public string Region { get; set; } = string.Empty; // Added for region validation
     public string ZipCode { get; set; } = string.Empty;
     public string Phone { get; set; } = string.Empty;
 }

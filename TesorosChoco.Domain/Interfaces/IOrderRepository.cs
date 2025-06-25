@@ -10,4 +10,5 @@ public interface IOrderRepository
     Task<Order> CreateAsync(Order order);
     Task<Order> UpdateAsync(Order order);
     Task DeleteAsync(int id);
+    Task<IEnumerable<Order>> GetOrdersByUserAndDateRangeAsync(int userId, DateTime startDate, DateTime endDate);
 }

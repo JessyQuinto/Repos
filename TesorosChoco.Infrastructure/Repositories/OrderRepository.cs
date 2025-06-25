@@ -161,10 +161,29 @@ public class OrderRepository : BaseRepository<Order>, IOrderRepository
                 // Entity Framework will handle cascade delete for order items
                 _dbSet.Remove(order);
                 await _context.SaveChangesAsync();
-            }        }
-        catch (DbUpdateException ex)
+            }        }        catch (DbUpdateException ex)
         {
             throw new InvalidOperationException($"Error deleting order with ID {id}", ex);
+        }
+    }
+
+    /// <summary>
+    /// Get orders for a specific user within a date range for business rule validation
+    /// </summary>
+    public async Task<IEnumerable<Order>> GetOrdersByUserAndDateRangeAsync(int userId, DateTime startDate, DateTime endDate)
+    {
+        try
+        {
+            return await _dbSet
+                .Where(o => o.UserId == userId && 
+                           o.CreatedAt >= startDate && 
+                           o.CreatedAt < endDate)
+                .OrderByDescending(o => o.CreatedAt)
+                .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Error retrieving orders for user {userId} in date range", ex);
         }
     }
 }

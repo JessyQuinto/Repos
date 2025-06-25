@@ -29,10 +29,11 @@ public static class DependencyInjection
             cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(PerformanceBehavior<,>));
             cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ExceptionHandlingBehavior<,>));
         });        // FluentValidation
-        services.AddValidatorsFromAssembly(assembly);
-
-        // Business Rules Validators
+        services.AddValidatorsFromAssembly(assembly);        // Business Rules Validators
         services.AddScoped<CreateOrderBusinessRulesValidator>();
+        services.AddScoped<TesorosChoco.Application.Validators.Orders.OrderValueAndLimitsValidator>();
+        services.AddScoped<TesorosChoco.Application.Validators.Orders.OrderTimeAndRegionValidator>();
+        services.AddScoped<TesorosChoco.Application.Validators.Products.ProductBusinessRulesValidator>();
 
         // Application Services (legacy - will be gradually replaced by CQRS)
         services.AddScoped<IAuthService, AuthService>();
