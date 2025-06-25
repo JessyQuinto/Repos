@@ -55,12 +55,14 @@ public class ProductsController : ControllerBase
                 SearchTerm = searchTerm,
                 Page = page,
                 PageSize = Math.Min(pageSize, 100) // Limit page size
-            };            var products = await _mediator.Send(query);
-            return Ok(ApiResponse<IEnumerable<ProductDto>>.SuccessResponse(products, "Products retrieved successfully"));
+            };
+            
+            var products = await _mediator.Send(query);
+            return Ok(products);
         }
         catch (FluentValidation.ValidationException ex)
         {
-            _logger.LogWarning("Validation failed for GetProducts: {Errors}", 
+            _logger.LogWarning("Validation failed for GetProducts: {Errors}",
                 string.Join(", ", ex.Errors.Select(e => e.ErrorMessage)));
             return BadRequest(new { 
                 error = "Validation failed", 
@@ -148,14 +150,14 @@ public class ProductsController : ControllerBase
         }
         catch (FluentValidation.ValidationException ex)
         {
-            _logger.LogWarning("Validation failed for CreateProduct: {Errors}", 
+            _logger.LogWarning("Validation failed for CreateProduct: {Errors}",
                 string.Join(", ", ex.Errors.Select(e => e.ErrorMessage)));
             return BadRequest(new { 
                 error = "Validation failed", 
                 errors = ex.Errors.Select(e => e.ErrorMessage) 
             });
         }
-        catch (InvalidOperationException ex)
+        catch (TesorosChoco.Domain.Exceptions.BusinessRuleViolationException ex)
         {
             _logger.LogWarning("Business rule violation in CreateProduct: {Message}", ex.Message);
             return BadRequest(new { error = "Business rule violation", message = ex.Message });
@@ -168,21 +170,23 @@ public class ProductsController : ControllerBase
                 message = "An error occurred while creating the product" 
             });
         }
-    }    /// <summary>
+    }
+
+    /// <summary>
     /// Actualiza un producto existente
     /// </summary>
-    /// <param name="id">ID del producto</param>
+    /// <param name="id">ID del producto a actualizar</param>
     /// <param name="request">Datos actualizados del producto</param>
-    /// <returns>No content</returns>
+    /// <returns>Producto actualizado</returns>
     [HttpPut("{id}")]
     [Authorize(Roles = "Admin")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProductDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> UpdateProduct(int id, [FromBody] UpdateProductRequest request)
+    public async Task<ActionResult<ProductDto>> UpdateProduct(int id, [FromBody] UpdateProductRequest request)
     {
         try
         {
@@ -199,18 +203,18 @@ public class ProductsController : ControllerBase
             }
             
             _logger.LogInformation("Product updated successfully: {ProductId}", id);
-            return NoContent();
+            return Ok(product);
         }
         catch (FluentValidation.ValidationException ex)
         {
-            _logger.LogWarning("Validation failed for UpdateProduct: {Errors}", 
+            _logger.LogWarning("Validation failed for UpdateProduct: {Errors}",
                 string.Join(", ", ex.Errors.Select(e => e.ErrorMessage)));
             return BadRequest(new { 
                 error = "Validation failed", 
                 errors = ex.Errors.Select(e => e.ErrorMessage) 
             });
         }
-        catch (InvalidOperationException ex)
+        catch (TesorosChoco.Domain.Exceptions.BusinessRuleViolationException ex)
         {
             _logger.LogWarning("Business rule violation in UpdateProduct: {Message}", ex.Message);
             return BadRequest(new { error = "Business rule violation", message = ex.Message });
@@ -228,8 +232,8 @@ public class ProductsController : ControllerBase
     /// <summary>
     /// Elimina un producto
     /// </summary>
-    /// <param name="id">ID del producto</param>
-    /// <returns>No content</returns>
+    /// <param name="id">ID del producto a eliminar</param>
+    /// <returns>Confirmación de eliminación</returns>
     [HttpDelete("{id}")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -237,7 +241,7 @@ public class ProductsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> DeleteProduct(int id)
+    public async Task<ActionResult> DeleteProduct(int id)
     {
         try
         {
@@ -285,7 +289,8 @@ public class ProductsController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting featured products");            return StatusCode(500, new { 
+            _logger.LogError(ex, "Error getting featured products");
+            return StatusCode(500, new { 
                 error = "Internal server error", 
                 message = "An error occurred while getting featured products" 
             });
@@ -309,134 +314,6 @@ public class ProductsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<SearchProductsResponse>> SearchProducts(
-        [FromQuery] string? q = null,
-        [FromQuery] int? category = null,
-        [FromQuery] decimal? minPrice = null,
-        [FromQuery] decimal? maxPrice = null,
-        [FromQuery] int? producer = null,
-        [FromQuery] bool? featured = null,
-        [FromQuery] int limit = 10,
-        [FromQuery] int offset = 0)
-    {
-        try
-        {
-            // Validate parameters
-            if (limit > 100) limit = 100; // Max limit
-            if (limit < 1) limit = 10;    // Default limit
-            if (offset < 0) offset = 0;   // Non-negative offset
-
-            var query = new SearchProductsQuery(
-                SearchTerm: q,
-                CategoryId: category,
-                MinPrice: minPrice,
-                MaxPrice: maxPrice,
-                ProducerId: producer,
-                Featured: featured,
-                Limit: limit,
-                Offset: offset);
-
-            var result = await _mediator.Send(query);
-            return Ok(result);
-        }
-        catch (FluentValidation.ValidationException ex)
-        {
-            _logger.LogWarning("Validation failed for SearchProducts: {Errors}", 
-                string.Join(", ", ex.Errors.Select(e => e.ErrorMessage)));
-            return BadRequest(new { 
-                error = "Validation failed", 
-                errors = ex.Errors.Select(e => e.ErrorMessage) 
-            });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error searching products");
-            return StatusCode(500, new { 
-                error = "Internal server error", 
-                message = "An error occurred while searching products" 
-            });
-        }
-    }
-
-    /// <summary>
-    /// Obtiene un producto específico por su slug
-    /// </summary>
-    /// <param name="slug">Slug del producto</param>
-    /// <returns>Producto específico</returns>
-    [HttpGet("slug/{slug}")]
-    [ProducesResponseType(typeof(ProductDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ProductDto>> GetProductBySlug(string slug)
-    {
-        try
-        {
-            var query = new GetProductBySlugQuery(slug);
-            var product = await _mediator.Send(query);
-            
-            if (product == null)
-            {
-                _logger.LogWarning("Product with slug {ProductSlug} not found", slug);
-                return NotFound(new { 
-                    error = "Product not found", 
-                    message = $"Product with slug '{slug}' was not found" 
-                });
-            }
-            
-            return Ok(product);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting product with slug {ProductSlug}", slug);
-            return StatusCode(500, new { 
-                error = "Internal server error", 
-                message = "An error occurred while getting the product" 
-            });
-        }
-    }
-
-    /// <summary>
-    /// Obtiene productos destacados (ruta alternativa sin versionado)
-    /// </summary>    /// <param name="count">Número de productos a obtener (por defecto 10)</param>
-    /// <returns>Lista de productos destacados</returns>
-    [HttpGet("/api/products/featured")]
-    [ProducesResponseType(typeof(IEnumerable<ProductDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<ProductDto>>> GetFeaturedProductsDocumentation([FromQuery] int count = 10)
-    {
-        try
-        {
-            var query = new GetFeaturedProductsQuery(Math.Min(count, 50)); // Limit count
-            var products = await _mediator.Send(query);
-            
-            return Ok(products);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting featured products");
-            return StatusCode(500, new { 
-                error = "Internal server error", 
-                message = "An error occurred while getting featured products" 
-            });
-        }
-    }
-
-    /// <summary>
-    /// Busca productos con filtros específicos (compatibilidad con documentación API)
-    /// </summary>
-    /// <param name="q">Término de búsqueda</param>
-    /// <param name="category">ID de categoría</param>
-    /// <param name="minPrice">Precio mínimo</param>
-    /// <param name="maxPrice">Precio máximo</param>
-    /// <param name="producer">ID del productor</param>
-    /// <param name="featured">Filtro por productos destacados</param>
-    /// <param name="limit">Número máximo de resultados</param>
-    /// <param name="offset">Número de resultados a omitir</param>
-    /// <returns>Resultados de búsqueda paginados</returns>
-    [HttpGet("/api/products/search")]
-    [ProducesResponseType(typeof(SearchProductsResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<SearchProductsResponse>> SearchProductsDocumentation(
         [FromQuery] string? q = null,
         [FromQuery] int? category = null,
         [FromQuery] decimal? minPrice = null,
@@ -483,29 +360,39 @@ public class ProductsController : ControllerBase
     }
 
     /// <summary>
-    /// Obtiene la lista de productos (compatibilidad con documentación API)
+    /// Obtiene un producto por su slug
     /// </summary>
-    /// <returns>Lista de productos</returns>
-    [HttpGet("/api/products")]
-    [ProducesResponseType(typeof(IEnumerable<ProductDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<ProductDto>>> GetProductsDocumentation()
-    {
-        return await GetProducts();
-    }
-
-    /// <summary>
-    /// Obtiene un producto específico por su ID (compatibilidad con documentación API)
-    /// </summary>
-    /// <param name="id">ID del producto</param>
+    /// <param name="slug">Slug del producto</param>
     /// <returns>Producto específico</returns>
-    [HttpGet("/api/products/{id}")]
+    [HttpGet("slug/{slug}")]
     [ProducesResponseType(typeof(ProductDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]    public async Task<ActionResult<ProductDto>> GetProductDocumentation(int id)
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ProductDto>> GetProductBySlug(string slug)
     {
-        return await GetProduct(id);
+        try
+        {
+            var query = new GetProductBySlugQuery(slug);
+            var product = await _mediator.Send(query);
+            
+            if (product == null)
+            {
+                _logger.LogWarning("Product with slug {ProductSlug} not found", slug);
+                return NotFound(new { 
+                    error = "Product not found", 
+                    message = $"Product with slug '{slug}' was not found" 
+                });
+            }
+            
+            return Ok(product);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting product with slug {ProductSlug}", slug);
+            return StatusCode(500, new { 
+                error = "Internal server error", 
+                message = "An error occurred while getting the product" 
+            });
+        }
     }
 }
