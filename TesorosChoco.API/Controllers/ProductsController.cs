@@ -396,13 +396,12 @@ public class ProductsController : ControllerBase
 
     /// <summary>
     /// Obtiene productos destacados (ruta alternativa sin versionado)
-    /// </summary>
-    /// <param name="count">Número de productos a obtener (por defecto 10)</param>
+    /// </summary>    /// <param name="count">Número de productos a obtener (por defecto 10)</param>
     /// <returns>Lista de productos destacados</returns>
     [HttpGet("/api/products/featured")]
     [ProducesResponseType(typeof(IEnumerable<ProductDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<ProductDto>>> GetFeaturedProductsLegacy([FromQuery] int count = 10)
+    public async Task<ActionResult<IEnumerable<ProductDto>>> GetFeaturedProductsDocumentation([FromQuery] int count = 10)
     {
         try
         {
@@ -422,7 +421,7 @@ public class ProductsController : ControllerBase
     }
 
     /// <summary>
-    /// Busca productos con filtros específicos (ruta alternativa sin versionado)
+    /// Busca productos con filtros específicos (compatibilidad con documentación API)
     /// </summary>
     /// <param name="q">Término de búsqueda</param>
     /// <param name="category">ID de categoría</param>
@@ -437,7 +436,124 @@ public class ProductsController : ControllerBase
     [ProducesResponseType(typeof(SearchProductsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<SearchProductsResponse>> SearchProductsLegacy(
+    public async Task<ActionResult<SearchProductsResponse>> SearchProductsDocumentation(
+        [FromQuery] string? q = null,
+        [FromQuery] int? category = null,
+        [FromQuery] decimal? minPrice = null,
+        [FromQuery] decimal? maxPrice = null,
+        [FromQuery] int? producer = null,
+        [FromQuery] bool? featured = null,
+        [FromQuery] int limit = 10,
+        [FromQuery] int offset = 0)
+    {
+        try
+        {
+            var query = new SearchProductsQuery(
+                SearchTerm: q,
+                CategoryId: category,
+                MinPrice: minPrice,
+                MaxPrice: maxPrice,
+                ProducerId: producer,
+                Featured: featured,
+                Limit: Math.Min(limit, 100), // Limit results
+                Offset: Math.Max(offset, 0)
+            );
+
+            var result = await _mediator.Send(query);
+            
+            return Ok(result);
+        }
+        catch (FluentValidation.ValidationException ex)
+        {
+            _logger.LogWarning("Validation failed for SearchProducts: {Errors}", 
+                string.Join(", ", ex.Errors.Select(e => e.ErrorMessage)));
+            return BadRequest(new { 
+                error = "Validation failed", 
+                errors = ex.Errors.Select(e => e.ErrorMessage) 
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error searching products");
+            return StatusCode(500, new { 
+                error = "Internal server error", 
+                message = "An error occurred while searching products" 
+            });
+        }
+    }
+
+    /// <summary>
+    /// Obtiene la lista de productos (compatibilidad con documentación API)
+    /// </summary>
+    /// <returns>Lista de productos</returns>
+    [HttpGet("/api/products")]
+    [ProducesResponseType(typeof(IEnumerable<ProductDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<IEnumerable<ProductDto>>> GetProductsDocumentation()
+    {
+        return await GetProducts();
+    }
+
+    /// <summary>
+    /// Obtiene un producto específico por su ID (compatibilidad con documentación API)
+    /// </summary>
+    /// <param name="id">ID del producto</param>
+    /// <returns>Producto específico</returns>
+    [HttpGet("/api/products/{id}")]
+    [ProducesResponseType(typeof(ProductDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ProductDto>> GetProductDocumentation(int id)
+    {
+        return await GetProduct(id);
+    }
+
+    /// <summary>
+    /// Obtiene productos destacados (compatibilidad con documentación API)
+    /// </summary>
+    /// <param name="count">Número de productos a obtener (por defecto 10)</param>
+    /// <returns>Lista de productos destacados</returns>
+    [HttpGet("/api/products/featured")]
+    [ProducesResponseType(typeof(IEnumerable<ProductDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<IEnumerable<ProductDto>>> GetFeaturedProductsDocumentation([FromQuery] int count = 10)
+    {
+        try
+        {
+            var query = new GetFeaturedProductsQuery(Math.Min(count, 50)); // Limit count
+            var products = await _mediator.Send(query);
+            
+            return Ok(products);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting featured products");
+            return StatusCode(500, new { 
+                error = "Internal server error", 
+                message = "An error occurred while getting featured products" 
+            });
+        }
+    }
+
+    /// <summary>
+    /// Busca productos con filtros específicos (compatibilidad con documentación API)
+    /// </summary>
+    /// <param name="q">Término de búsqueda</param>
+    /// <param name="category">ID de categoría</param>
+    /// <param name="minPrice">Precio mínimo</param>
+    /// <param name="maxPrice">Precio máximo</param>
+    /// <param name="producer">ID del productor</param>
+    /// <param name="featured">Filtro por productos destacados</param>
+    /// <param name="limit">Número máximo de resultados</param>
+    /// <param name="offset">Número de resultados a omitir</param>
+    /// <returns>Resultados de búsqueda paginados</returns>
+    [HttpGet("/api/products/search")]
+    [ProducesResponseType(typeof(SearchProductsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<SearchProductsResponse>> SearchProductsDocumentation(
         [FromQuery] string? q = null,
         [FromQuery] int? category = null,
         [FromQuery] decimal? minPrice = null,

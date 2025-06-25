@@ -10,7 +10,7 @@ namespace TesorosChoco.API.Controllers;
 [ApiController]
 [Route("api/v1/users")]
 [Produces("application/json")]
-public class UsersController : ControllerBase
+public class UsersController : BaseController
 {
     private readonly IUserService _userService;
     private readonly ILogger<UsersController> _logger;
@@ -31,16 +31,13 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<UserDto>>> GetUserProfile(int id)
-    {
+    public async Task<ActionResult<ApiResponse<UserDto>>> GetUserProfile(int id)    {
         try
         {
-            var currentUserId = GetCurrentUserId();
-            
             // Users can only access their own profile unless they are admin
-            if (currentUserId != id && !User.IsInRole("Admin"))
+            if (!CanAccessUserResource(id))
             {
-                _logger.LogWarning("User {CurrentUserId} attempted to access profile of user {UserId}", currentUserId, id);
+                _logger.LogWarning("User attempted to access profile of user {UserId} without permission", id);
                 return Forbid();
             }
 
@@ -74,16 +71,13 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<UserDto>>> UpdateUserProfile(int id, [FromBody] UpdateProfileRequest request)
-    {
+    public async Task<ActionResult<ApiResponse<UserDto>>> UpdateUserProfile(int id, [FromBody] UpdateProfileRequest request)    {
         try
         {
-            var currentUserId = GetCurrentUserId();
-            
             // Users can only update their own profile unless they are admin
-            if (currentUserId != id && !User.IsInRole("Admin"))
+            if (!CanAccessUserResource(id))
             {
-                _logger.LogWarning("User {CurrentUserId} attempted to update profile of user {UserId}", currentUserId, id);
+                _logger.LogWarning("User attempted to update profile of user {UserId} without permission", id);
                 return Forbid();
             }
 
@@ -106,28 +100,14 @@ public class UsersController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating user profile for ID {UserId}", id);
-            return StatusCode(500, ApiResponse.ErrorResponse("An error occurred while updating user profile"));
+            _logger.LogError(ex, "Error updating user profile for ID {UserId}", id);            return StatusCode(500, ApiResponse.ErrorResponse("An error occurred while updating user profile"));
         }
-    }    /// <summary>
-    /// Obtiene el ID del usuario actual desde el token JWT
-    /// </summary>
-    /// <returns>ID del usuario</returns>
-    private int GetCurrentUserId()
-    {
-        var userIdClaim = User.FindFirst("userId") ?? User.FindFirst("sub");
-        if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out var userId))
-        {
-            throw new UnauthorizedAccessException("Invalid user token");
-        }
-        return userId;
     }
 
-    // Alternative routes without versioning for documentation compatibility
+    // Rutas de compatibilidad con documentación API
     
     /// <summary>
-    /// Obtiene el perfil de un usuario específico (ruta alternativa sin versionado)
-    /// </summary>
+    /// Obtiene el perfil de un usuario específico (compatibilidad con documentación API)    /// </summary>
     /// <param name="id">ID del usuario</param>
     /// <returns>Perfil del usuario</returns>
     [HttpGet("/api/users/{id}")]
@@ -137,13 +117,13 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<UserDto>>> GetUserProfileAlternative(int id)
+    public async Task<ActionResult<ApiResponse<UserDto>>> GetUserProfileDocumentation(int id)
     {
         return await GetUserProfile(id);
     }
 
     /// <summary>
-    /// Actualiza el perfil de un usuario (ruta alternativa sin versionado)
+    /// Actualiza el perfil de un usuario (compatibilidad con documentación API)
     /// </summary>
     /// <param name="id">ID del usuario</param>
     /// <param name="request">Datos a actualizar</param>
@@ -156,7 +136,7 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<UserDto>>> UpdateUserProfileAlternative(int id, [FromBody] UpdateProfileRequest request)
+    public async Task<ActionResult<ApiResponse<UserDto>>> UpdateUserProfileDocumentation(int id, [FromBody] UpdateProfileRequest request)
     {
         return await UpdateUserProfile(id, request);
     }

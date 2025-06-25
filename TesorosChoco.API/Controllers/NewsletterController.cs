@@ -56,6 +56,21 @@ public class NewsletterController : ControllerBase
     }
 
     /// <summary>
+    /// Suscribe un email al newsletter (compatibilidad con documentación API)
+    /// </summary>
+    /// <param name="request">Email a suscribir</param>
+    /// <returns>Confirmación de suscripción</returns>
+    [HttpPost("/api/newsletter/subscribe")]
+    [ProducesResponseType(typeof(ApiResponse<GenericResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<GenericResponse>>> SubscribeDocumentation([FromBody] NewsletterSubscriptionRequest request)
+    {
+        return await Subscribe(request);
+    }
+
+    /// <summary>
     /// Cancela la suscripción al newsletter
     /// </summary>
     /// <param name="email">Email a desuscribir</param>

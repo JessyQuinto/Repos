@@ -11,7 +11,7 @@ namespace TesorosChoco.API.Controllers;
 [Route("api/v1/orders")]
 [Authorize]
 [Produces("application/json")]
-public class OrdersController : ControllerBase
+public class OrdersController : BaseController
 {
     private readonly IOrderService _orderService;
     private readonly ILogger<OrdersController> _logger;
@@ -196,41 +196,27 @@ public class OrdersController : ControllerBase
         {
             _logger.LogError(ex, "Error updating order status for order {OrderId}", id);
             return StatusCode(StatusCodes.Status500InternalServerError, 
-                ApiResponse<OrderDto>.ErrorResponse("An error occurred while updating order status"));
-        }
-    }    /// <summary>
-    /// Obtiene el ID del usuario actual desde el token JWT
-    /// </summary>
-    /// <returns>ID del usuario</returns>
-    private int GetCurrentUserId()
-    {
-        var userIdClaim = User.FindFirst("userId") ?? User.FindFirst("sub");
-        if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out var userId))
-        {
-            throw new UnauthorizedAccessException("Invalid user token");
-        }
-        return userId;
+                ApiResponse<OrderDto>.ErrorResponse("An error occurred while updating order status"));        }
     }
 
-    // Alternative routes without versioning for documentation compatibility
+    // Rutas de compatibilidad con documentación API
     
     /// <summary>
-    /// Crea una nueva orden de compra (ruta alternativa sin versionado)
-    /// </summary>
-    /// <param name="request">Datos de la orden</param>
+    /// Crea una nueva orden de compra (compatibilidad con documentación API)
+    /// </summary>    /// <param name="request">Datos de la orden</param>
     /// <returns>Orden creada</returns>
     [HttpPost("/api/orders")]
     [ProducesResponseType(typeof(ApiResponse<OrderDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<OrderDto>>> CreateOrderAlternative([FromBody] CreateOrderRequest request)
+    public async Task<ActionResult<ApiResponse<OrderDto>>> CreateOrderDocumentation([FromBody] CreateOrderRequest request)
     {
         return await CreateOrder(request);
     }
 
     /// <summary>
-    /// Obtiene una orden específica por su ID (ruta alternativa sin versionado)
+    /// Obtiene una orden específica por su ID (compatibilidad con documentación API)
     /// </summary>
     /// <param name="id">ID de la orden</param>
     /// <returns>Orden específica</returns>
@@ -240,11 +226,11 @@ public class OrdersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<OrderDto>>> GetOrderAlternative(int id)
+    public async Task<ActionResult<ApiResponse<OrderDto>>> GetOrderDocumentation(int id)
     {
         return await GetOrder(id);
     }    /// <summary>
-    /// Obtiene las órdenes del usuario autenticado (ruta alternativa sin versionado)
+    /// Obtiene las órdenes del usuario especificado (compatibilidad con documentación API)
     /// </summary>
     /// <returns>Lista de órdenes del usuario</returns>
     [HttpGet("/api/orders/user/{userId}")]
@@ -253,13 +239,13 @@ public class OrdersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<IEnumerable<OrderDto>>>> GetOrdersByUserIdAlternative(int userId)
+    public async Task<ActionResult<ApiResponse<IEnumerable<OrderDto>>>> GetOrdersByUserIdDocumentation(int userId)
     {
         return await GetOrdersByUserId(userId);
     }
 
     /// <summary>
-    /// Actualiza el estado de una orden (ruta alternativa sin versionado)
+    /// Actualiza el estado de una orden (compatibilidad con documentación API)
     /// </summary>
     /// <param name="id">ID de la orden</param>
     /// <param name="request">Nuevo estado</param>
@@ -271,7 +257,7 @@ public class OrdersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<OrderDto>>> UpdateOrderStatusAlternative(int id, [FromBody] UpdateOrderStatusRequest request)
+    public async Task<ActionResult<ApiResponse<OrderDto>>> UpdateOrderStatusDocumentation(int id, [FromBody] UpdateOrderStatusRequest request)
     {
         return await UpdateOrderStatus(id, request);
     }

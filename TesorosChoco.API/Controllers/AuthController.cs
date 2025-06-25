@@ -229,10 +229,8 @@ public class AuthController : ControllerBase
             _logger.LogError(ex, "Error resetting password");
             return StatusCode(500, new { error = "Internal server error", message = "An error occurred while resetting password" });
         }
-    }
-
-    /// <summary>
-    /// Autenticación de usuario (ruta alternativa sin versionado)
+    }    /// <summary>
+    /// Autenticación de usuario (compatibilidad con documentación API)
     /// </summary>
     /// <param name="request">Credenciales de login</param>
     /// <returns>Token de autenticación y datos del usuario</returns>
@@ -241,13 +239,13 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<AuthResponse>>> LoginAlternative([FromBody] LoginRequest request)
+    public async Task<ActionResult<ApiResponse<AuthResponse>>> LoginDocumentation([FromBody] LoginRequest request)
     {
         return await Login(request);
     }
 
     /// <summary>
-    /// Registro de nuevo usuario (ruta alternativa sin versionado)
+    /// Registro de nuevo usuario (compatibilidad con documentación API)
     /// </summary>
     /// <param name="request">Datos del nuevo usuario</param>
     /// <returns>Token de autenticación y datos del usuario registrado</returns>
@@ -256,7 +254,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status409Conflict)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<AuthResponse>>> RegisterAlternative([FromBody] RegisterRequest request)
+    public async Task<ActionResult<ApiResponse<AuthResponse>>> RegisterDocumentation([FromBody] RegisterRequest request)
     {
         return await Register(request);
     }

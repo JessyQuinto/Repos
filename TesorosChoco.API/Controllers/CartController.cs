@@ -11,7 +11,7 @@ namespace TesorosChoco.API.Controllers;
 [Route("api/v1/cart")]
 [Authorize]
 [Produces("application/json")]
-public class CartController : ControllerBase
+public class CartController : BaseController
 {
     private readonly ICartService _cartService;
     private readonly ILogger<CartController> _logger;
@@ -386,33 +386,22 @@ public class CartController : ControllerBase
         }
     }    /// <summary>
     /// Obtiene el ID del usuario actual desde el token JWT
-    /// </summary>
-    /// <returns>ID del usuario</returns>
-    private int GetCurrentUserId()
-    {
-        var userIdClaim = User.FindFirst("userId") ?? User.FindFirst("sub");
-        if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out var userId))
-        {
-            throw new UnauthorizedAccessException("Invalid user token");
-        }
-        return userId;
-    }    // Alternative routes without versioning for documentation compatibility
-    
+    /// </summary>    // Rutas de compatibilidad con documentación API    
     /// <summary>
-    /// Obtiene el carrito del usuario autenticado (ruta alternativa sin versionado)
+    /// Obtiene el carrito del usuario autenticado (compatibilidad con documentación API)
     /// </summary>
     /// <returns>Carrito del usuario</returns>
     [HttpGet("/api/cart")]
     [ProducesResponseType(typeof(ApiResponse<CartDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<CartDto>>> GetCartAlternative()
+    public async Task<ActionResult<ApiResponse<CartDto>>> GetCartDocumentation()
     {
         return await GetCart();
     }
 
     /// <summary>
-    /// Actualiza el carrito del usuario (ruta alternativa sin versionado)
+    /// Actualiza el carrito del usuario (compatibilidad con documentación API)
     /// </summary>
     /// <param name="request">Items del carrito a actualizar</param>
     /// <returns>Carrito actualizado</returns>
@@ -421,8 +410,21 @@ public class CartController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<CartDto>> UpdateCartAlternative([FromBody] UpdateCartRequest request)
+    public async Task<ActionResult<CartDto>> UpdateCartDocumentation([FromBody] UpdateCartRequest request)
     {
         return await UpdateCart(request);
+    }
+
+    /// <summary>
+    /// Vacía completamente el carrito del usuario (compatibilidad con documentación API)
+    /// </summary>
+    /// <returns>No content</returns>
+    [HttpDelete("/api/cart")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> ClearCartDocumentation()
+    {
+        return await ClearCart();
     }
 }
