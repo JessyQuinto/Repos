@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TesorosChoco.Application.DTOs;
 using TesorosChoco.Application.Interfaces;
+using TesorosChoco.API.Common;
 
 namespace TesorosChoco.API.Controllers;
 
@@ -21,16 +22,14 @@ public class CategoriesController : ControllerBase
         _categoryService = categoryService;
         _productService = productService;
         _logger = logger;
-    }
-
-    /// <summary>
+    }    /// <summary>
     /// Obtiene todas las categorías de productos
     /// </summary>
     /// <returns>Lista de categorías</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(IEnumerable<CategoryDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<CategoryDto>>> GetCategories()
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<CategoryDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<CategoryDto>>>> GetCategories()
     {
         try
         {
@@ -39,25 +38,23 @@ public class CategoriesController : ControllerBase
             var categories = await _categoryService.GetAllCategoriesAsync();
             
             _logger.LogInformation("Retrieved {Count} categories", categories.Count());
-            return Ok(categories);
+            return Ok(ApiResponse<IEnumerable<CategoryDto>>.SuccessResponse(categories, "Categories retrieved successfully"));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting categories");
-            return StatusCode(500, new { error = "Internal server error", message = "An error occurred while getting categories" });
+            return StatusCode(500, ApiResponse.ErrorResponse("An error occurred while getting categories"));
         }
-    }
-
-    /// <summary>
+    }    /// <summary>
     /// Obtiene una categoría específica por su ID
     /// </summary>
     /// <param name="id">ID de la categoría</param>
     /// <returns>Categoría específica</returns>
     [HttpGet("{id}")]
-    [ProducesResponseType(typeof(CategoryDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<CategoryDto>> GetCategory(int id)
+    [ProducesResponseType(typeof(ApiResponse<CategoryDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<CategoryDto>>> GetCategory(int id)
     {
         try
         {
@@ -67,28 +64,26 @@ public class CategoriesController : ControllerBase
             if (category == null)
             {
                 _logger.LogWarning("Category with ID {CategoryId} not found", id);
-                return NotFound(new { error = "Category not found", message = $"Category with ID {id} was not found" });
+                return NotFound(ApiResponse.ErrorResponse($"Category with ID {id} was not found"));
             }
             
-            return Ok(category);
+            return Ok(ApiResponse<CategoryDto>.SuccessResponse(category, "Category retrieved successfully"));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting category with ID {CategoryId}", id);
-            return StatusCode(500, new { error = "Internal server error", message = "An error occurred while getting the category" });
+            return StatusCode(500, ApiResponse.ErrorResponse("An error occurred while getting the category"));
         }
-    }
-
-    /// <summary>
+    }    /// <summary>
     /// Obtiene productos de una categoría específica
     /// </summary>
     /// <param name="categoryId">ID de la categoría</param>
     /// <returns>Lista de productos de la categoría</returns>
     [HttpGet("{categoryId}/products")]
-    [ProducesResponseType(typeof(IEnumerable<ProductDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<ProductDto>>> GetProductsByCategory(int categoryId)
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<ProductDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<ProductDto>>>> GetProductsByCategory(int categoryId)
     {
         try
         {
@@ -99,17 +94,46 @@ public class CategoriesController : ControllerBase
             if (category == null)
             {
                 _logger.LogWarning("Category with ID {CategoryId} not found", categoryId);
-                return NotFound(new { error = "Category not found", message = $"Category with ID {categoryId} was not found" });
+                return NotFound(ApiResponse.ErrorResponse($"Category with ID {categoryId} was not found"));
             }
             
             var products = await _productService.GetProductsByCategoryAsync(categoryId);
             
             _logger.LogInformation("Retrieved {Count} products for category {CategoryId}", products.Count(), categoryId);
-            return Ok(products);
-        }        catch (Exception ex)
+            return Ok(ApiResponse<IEnumerable<ProductDto>>.SuccessResponse(products, "Products retrieved successfully"));
+        }
+        catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting products for category {CategoryId}", categoryId);
-            return StatusCode(500, new { error = "Internal server error", message = "An error occurred while getting products for the category" });
+            return StatusCode(500, ApiResponse.ErrorResponse("An error occurred while getting products for the category"));
         }
+    }
+
+    // Alternative routes without versioning for documentation compatibility
+    
+    /// <summary>
+    /// Obtiene todas las categorías de productos (ruta alternativa sin versionado)
+    /// </summary>
+    /// <returns>Lista de categorías</returns>
+    [HttpGet("/api/categories")]
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<CategoryDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<CategoryDto>>>> GetCategoriesAlternative()
+    {
+        return await GetCategories();
+    }
+
+    /// <summary>
+    /// Obtiene una categoría específica por su ID (ruta alternativa sin versionado)
+    /// </summary>
+    /// <param name="id">ID de la categoría</param>
+    /// <returns>Categoría específica</returns>
+    [HttpGet("/api/categories/{id}")]
+    [ProducesResponseType(typeof(ApiResponse<CategoryDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<CategoryDto>>> GetCategoryAlternative(int id)
+    {
+        return await GetCategory(id);
     }
 }

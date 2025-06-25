@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TesorosChoco.Application.DTOs;
 using TesorosChoco.Application.DTOs.Requests;
 using TesorosChoco.Application.Interfaces;
+using TesorosChoco.API.Common;
 
 namespace TesorosChoco.API.Controllers;
 
@@ -18,21 +19,19 @@ public class UsersController : ControllerBase
     {
         _userService = userService;
         _logger = logger;
-    }
-
-    /// <summary>
+    }    /// <summary>
     /// Obtiene el perfil de un usuario específico
     /// </summary>
     /// <param name="id">ID del usuario</param>
     /// <returns>Perfil del usuario</returns>
     [HttpGet("{id}")]
     [Authorize]
-    [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<UserDto>> GetUserProfile(int id)
+    [ProducesResponseType(typeof(ApiResponse<UserDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<UserDto>>> GetUserProfile(int id)
     {
         try
         {
@@ -51,19 +50,17 @@ public class UsersController : ControllerBase
             if (user == null)
             {
                 _logger.LogWarning("User with ID {UserId} not found", id);
-                return NotFound(new { error = "User not found", message = $"User with ID {id} was not found" });
+                return NotFound(ApiResponse.ErrorResponse($"User with ID {id} was not found"));
             }
             
-            return Ok(user);
+            return Ok(ApiResponse<UserDto>.SuccessResponse(user, "User profile retrieved successfully"));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting user profile for ID {UserId}", id);
-            return StatusCode(500, new { error = "Internal server error", message = "An error occurred while getting user profile" });
+            return StatusCode(500, ApiResponse.ErrorResponse("An error occurred while getting user profile"));
         }
-    }
-
-    /// <summary>
+    }    /// <summary>
     /// Actualiza el perfil de un usuario
     /// </summary>
     /// <param name="id">ID del usuario</param>
@@ -71,13 +68,13 @@ public class UsersController : ControllerBase
     /// <returns>Perfil actualizado del usuario</returns>
     [HttpPut("{id}")]
     [Authorize]
-    [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<UserDto>> UpdateUserProfile(int id, [FromBody] UpdateProfileRequest request)
+    [ProducesResponseType(typeof(ApiResponse<UserDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<UserDto>>> UpdateUserProfile(int id, [FromBody] UpdateProfileRequest request)
     {
         try
         {
@@ -96,24 +93,23 @@ public class UsersController : ControllerBase
             if (user == null)
             {
                 _logger.LogWarning("User with ID {UserId} not found", id);
-                return NotFound(new { error = "User not found", message = $"User with ID {id} was not found" });
+                return NotFound(ApiResponse.ErrorResponse($"User with ID {id} was not found"));
             }
             
             _logger.LogInformation("Profile updated successfully for user: {UserId}", id);
-            return Ok(user);
+            return Ok(ApiResponse<UserDto>.SuccessResponse(user, "User profile updated successfully"));
         }
         catch (ArgumentException ex)
         {
             _logger.LogWarning("Profile update failed: {Message}", ex.Message);
-            return BadRequest(new { error = "Invalid request", message = ex.Message });
+            return BadRequest(ApiResponse.ErrorResponse(ex.Message));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating user profile for ID {UserId}", id);
-            return StatusCode(500, new { error = "Internal server error", message = "An error occurred while updating user profile" });
-        }    }
-
-    /// <summary>
+            return StatusCode(500, ApiResponse.ErrorResponse("An error occurred while updating user profile"));
+        }
+    }    /// <summary>
     /// Obtiene el ID del usuario actual desde el token JWT
     /// </summary>
     /// <returns>ID del usuario</returns>
@@ -125,5 +121,43 @@ public class UsersController : ControllerBase
             throw new UnauthorizedAccessException("Invalid user token");
         }
         return userId;
+    }
+
+    // Alternative routes without versioning for documentation compatibility
+    
+    /// <summary>
+    /// Obtiene el perfil de un usuario específico (ruta alternativa sin versionado)
+    /// </summary>
+    /// <param name="id">ID del usuario</param>
+    /// <returns>Perfil del usuario</returns>
+    [HttpGet("/api/users/{id}")]
+    [Authorize]
+    [ProducesResponseType(typeof(ApiResponse<UserDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<UserDto>>> GetUserProfileAlternative(int id)
+    {
+        return await GetUserProfile(id);
+    }
+
+    /// <summary>
+    /// Actualiza el perfil de un usuario (ruta alternativa sin versionado)
+    /// </summary>
+    /// <param name="id">ID del usuario</param>
+    /// <param name="request">Datos a actualizar</param>
+    /// <returns>Perfil actualizado del usuario</returns>
+    [HttpPut("/api/users/{id}")]
+    [Authorize]
+    [ProducesResponseType(typeof(ApiResponse<UserDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<UserDto>>> UpdateUserProfileAlternative(int id, [FromBody] UpdateProfileRequest request)
+    {
+        return await UpdateUserProfile(id, request);
     }
 }

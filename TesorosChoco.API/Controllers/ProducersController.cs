@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TesorosChoco.Application.DTOs;
 using TesorosChoco.Application.Interfaces;
+using TesorosChoco.API.Common;
 
 namespace TesorosChoco.API.Controllers;
 
@@ -21,16 +22,14 @@ public class ProducersController : ControllerBase
         _producerService = producerService;
         _productService = productService;
         _logger = logger;
-    }
-
-    /// <summary>
+    }    /// <summary>
     /// Obtiene todos los productores/artesanos
     /// </summary>
     /// <returns>Lista de productores</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(IEnumerable<ProducerDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<ProducerDto>>> GetProducers()
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<ProducerDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<ProducerDto>>>> GetProducers()
     {
         try
         {
@@ -39,25 +38,23 @@ public class ProducersController : ControllerBase
             var producers = await _producerService.GetAllProducersAsync();
             
             _logger.LogInformation("Retrieved {Count} producers", producers.Count());
-            return Ok(producers);
+            return Ok(ApiResponse<IEnumerable<ProducerDto>>.SuccessResponse(producers, "Producers retrieved successfully"));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting producers");
-            return StatusCode(500, new { error = "Internal server error", message = "An error occurred while getting producers" });
+            return StatusCode(500, ApiResponse.ErrorResponse("An error occurred while getting producers"));
         }
-    }
-
-    /// <summary>
+    }    /// <summary>
     /// Obtiene un productor específico por su ID
     /// </summary>
     /// <param name="id">ID del productor</param>
     /// <returns>Productor específico</returns>
     [HttpGet("{id}")]
-    [ProducesResponseType(typeof(ProducerDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ProducerDto>> GetProducer(int id)
+    [ProducesResponseType(typeof(ApiResponse<ProducerDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<ProducerDto>>> GetProducer(int id)
     {
         try
         {
@@ -67,15 +64,15 @@ public class ProducersController : ControllerBase
             if (producer == null)
             {
                 _logger.LogWarning("Producer with ID {ProducerId} not found", id);
-                return NotFound(new { error = "Producer not found", message = $"Producer with ID {id} was not found" });
+                return NotFound(ApiResponse.ErrorResponse($"Producer with ID {id} was not found"));
             }
             
-            return Ok(producer);
+            return Ok(ApiResponse<ProducerDto>.SuccessResponse(producer, "Producer retrieved successfully"));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting producer with ID {ProducerId}", id);
-            return StatusCode(500, new { error = "Internal server error", message = "An error occurred while getting the producer" });
+            return StatusCode(500, ApiResponse.ErrorResponse("An error occurred while getting the producer"));
         }
     }
 
@@ -85,10 +82,10 @@ public class ProducersController : ControllerBase
     /// <param name="producerId">ID del productor</param>
     /// <returns>Lista de productos del productor</returns>
     [HttpGet("{producerId}/products")]
-    [ProducesResponseType(typeof(IEnumerable<ProductDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<ProductDto>>> GetProductsByProducer(int producerId)
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<ProductDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<ProductDto>>>> GetProductsByProducer(int producerId)
     {
         try
         {
@@ -99,17 +96,46 @@ public class ProducersController : ControllerBase
             if (producer == null)
             {
                 _logger.LogWarning("Producer with ID {ProducerId} not found", producerId);
-                return NotFound(new { error = "Producer not found", message = $"Producer with ID {producerId} was not found" });
+                return NotFound(ApiResponse.ErrorResponse($"Producer with ID {producerId} was not found"));
             }
             
             var products = await _productService.GetProductsByProducerAsync(producerId);
             
             _logger.LogInformation("Retrieved {Count} products for producer {ProducerId}", products.Count(), producerId);
-            return Ok(products);
+            return Ok(ApiResponse<IEnumerable<ProductDto>>.SuccessResponse(products, "Products retrieved successfully"));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting products for producer {ProducerId}", producerId);
-            return StatusCode(500, new { error = "Internal server error", message = "An error occurred while getting products for the producer" });
-        }    }
+            return StatusCode(500, ApiResponse.ErrorResponse("An error occurred while getting products for the producer"));
+        }
+    }
+
+    // Alternative routes without versioning for documentation compatibility
+    
+    /// <summary>
+    /// Obtiene todos los productores/artesanos (ruta alternativa sin versionado)
+    /// </summary>
+    /// <returns>Lista de productores</returns>
+    [HttpGet("/api/producers")]
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<ProducerDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<ProducerDto>>>> GetProducersAlternative()
+    {
+        return await GetProducers();
+    }
+
+    /// <summary>
+    /// Obtiene un productor específico por su ID (ruta alternativa sin versionado)
+    /// </summary>
+    /// <param name="id">ID del productor</param>
+    /// <returns>Productor específico</returns>
+    [HttpGet("/api/producers/{id}")]
+    [ProducesResponseType(typeof(ApiResponse<ProducerDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<ProducerDto>>> GetProducerAlternative(int id)
+    {
+        return await GetProducer(id);
+    }
 }

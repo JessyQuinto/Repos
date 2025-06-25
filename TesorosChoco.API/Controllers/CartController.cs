@@ -384,9 +384,7 @@ public class CartController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError, 
                 ApiResponse.ErrorResponse("An error occurred while validating stock"));
         }
-    }
-
-    /// <summary>
+    }    /// <summary>
     /// Obtiene el ID del usuario actual desde el token JWT
     /// </summary>
     /// <returns>ID del usuario</returns>
@@ -398,5 +396,33 @@ public class CartController : ControllerBase
             throw new UnauthorizedAccessException("Invalid user token");
         }
         return userId;
+    }    // Alternative routes without versioning for documentation compatibility
+    
+    /// <summary>
+    /// Obtiene el carrito del usuario autenticado (ruta alternativa sin versionado)
+    /// </summary>
+    /// <returns>Carrito del usuario</returns>
+    [HttpGet("/api/cart")]
+    [ProducesResponseType(typeof(ApiResponse<CartDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<CartDto>>> GetCartAlternative()
+    {
+        return await GetCart();
+    }
+
+    /// <summary>
+    /// Actualiza el carrito del usuario (ruta alternativa sin versionado)
+    /// </summary>
+    /// <param name="request">Items del carrito a actualizar</param>
+    /// <returns>Carrito actualizado</returns>
+    [HttpPost("/api/cart")]
+    [ProducesResponseType(typeof(CartDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<CartDto>> UpdateCartAlternative([FromBody] UpdateCartRequest request)
+    {
+        return await UpdateCart(request);
     }
 }

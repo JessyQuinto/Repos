@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using TesorosChoco.Application.DTOs.Requests;
 using TesorosChoco.Application.DTOs.Responses;
 using TesorosChoco.Application.Interfaces;
+using TesorosChoco.API.Common;
 
 namespace TesorosChoco.API.Controllers;
 
@@ -17,18 +18,16 @@ public class ContactController : ControllerBase
     {
         _contactService = contactService;
         _logger = logger;
-    }
-
-    /// <summary>
+    }    /// <summary>
     /// Envía un mensaje de contacto
     /// </summary>
     /// <param name="request">Datos del mensaje de contacto</param>
     /// <returns>Confirmación del envío</returns>
     [HttpPost]
-    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<GenericResponse>> SubmitContactForm([FromBody] ContactRequest request)
+    [ProducesResponseType(typeof(ApiResponse<GenericResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<GenericResponse>>> SubmitContactForm([FromBody] ContactRequest request)
     {
         try
         {
@@ -37,24 +36,17 @@ public class ContactController : ControllerBase
             var result = await _contactService.SendContactMessageAsync(request);
             
             _logger.LogInformation("Contact form submitted successfully from {Email}", request.Email);
-            return Ok(result);
+            return Ok(ApiResponse<GenericResponse>.SuccessResponse(result, "Contact form submitted successfully"));
         }
         catch (ArgumentException ex)
         {
             _logger.LogWarning("Invalid contact form submission: {Message}", ex.Message);
-            return BadRequest(new GenericResponse
-            {
-                Success = false,
-                Message = ex.Message
-            });
+            return BadRequest(ApiResponse.ErrorResponse(ex.Message));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error processing contact form submission");
-            return StatusCode(500, new GenericResponse
-            {
-                Success = false,
-                Message = "An error occurred while processing your request"
-            });
-        }    }
+            return StatusCode(500, ApiResponse.ErrorResponse("An error occurred while processing your request"));
+        }
+    }
 }

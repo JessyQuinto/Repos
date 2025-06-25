@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using TesorosChoco.Application.DTOs.Requests;
 using TesorosChoco.Application.DTOs.Responses;
 using TesorosChoco.Application.Interfaces;
+using TesorosChoco.API.Common;
 
 namespace TesorosChoco.API.Controllers;
 
@@ -17,19 +18,17 @@ public class NewsletterController : ControllerBase
     {
         _newsletterService = newsletterService;
         _logger = logger;
-    }
-
-    /// <summary>
+    }    /// <summary>
     /// Suscribe un email al newsletter
     /// </summary>
     /// <param name="request">Email a suscribir</param>
     /// <returns>Confirmación de suscripción</returns>
     [HttpPost("subscribe")]
-    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<GenericResponse>> Subscribe([FromBody] NewsletterSubscriptionRequest request)
+    [ProducesResponseType(typeof(ApiResponse<GenericResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<GenericResponse>>> Subscribe([FromBody] NewsletterSubscriptionRequest request)
     {
         try
         {
@@ -38,34 +37,21 @@ public class NewsletterController : ControllerBase
             var result = await _newsletterService.SubscribeAsync(request);
             
             _logger.LogInformation("Newsletter subscription processed for {Email}", request.Email);
-            return Ok(result);
+            return Ok(ApiResponse<GenericResponse>.SuccessResponse(result, "Newsletter subscription successful"));
         }
         catch (ArgumentException ex)
         {
             _logger.LogWarning("Invalid newsletter subscription: {Message}", ex.Message);
-            return BadRequest(new GenericResponse
-            {
-                Success = false,
-                Message = ex.Message
-            });
+            return BadRequest(ApiResponse.ErrorResponse(ex.Message));
         }
         catch (InvalidOperationException ex)
         {
             _logger.LogWarning("Newsletter subscription already exists: {Message}", ex.Message);
-            return Conflict(new GenericResponse
-            {
-                Success = false,
-                Message = ex.Message
-            });
-        }
-        catch (Exception ex)
+            return Conflict(ApiResponse.ErrorResponse(ex.Message));
+        }        catch (Exception ex)
         {
             _logger.LogError(ex, "Error processing newsletter subscription");
-            return StatusCode(500, new GenericResponse
-            {
-                Success = false,
-                Message = "An error occurred while processing your subscription"
-            });
+            return StatusCode(500, ApiResponse.ErrorResponse("An error occurred while processing your subscription"));
         }
     }
 
@@ -75,10 +61,10 @@ public class NewsletterController : ControllerBase
     /// <param name="email">Email a desuscribir</param>
     /// <returns>Confirmación de cancelación</returns>
     [HttpDelete("unsubscribe/{email}")]
-    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<GenericResponse>> Unsubscribe(string email)
+    [ProducesResponseType(typeof(ApiResponse<GenericResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<GenericResponse>>> Unsubscribe(string email)
     {
         try
         {
@@ -87,20 +73,16 @@ public class NewsletterController : ControllerBase
             var result = await _newsletterService.UnsubscribeAsync(email);
             if (!result.Success)
             {
-                return NotFound(result);
+                return NotFound(ApiResponse<GenericResponse>.ErrorResponse("Email subscription not found", result));
             }
             
             _logger.LogInformation("Newsletter unsubscription processed for {Email}", email);
-            return Ok(result);
+            return Ok(ApiResponse<GenericResponse>.SuccessResponse(result, "Newsletter unsubscription successful"));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error processing newsletter unsubscription");
-            return StatusCode(500, new GenericResponse
-            {
-                Success = false,
-                Message = "An error occurred while processing your unsubscription"
-            });
+            return StatusCode(500, ApiResponse.ErrorResponse("An error occurred while processing your unsubscription"));
         }
     }
 }

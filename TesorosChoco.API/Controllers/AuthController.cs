@@ -230,4 +230,34 @@ public class AuthController : ControllerBase
             return StatusCode(500, new { error = "Internal server error", message = "An error occurred while resetting password" });
         }
     }
+
+    /// <summary>
+    /// Autenticación de usuario (ruta alternativa sin versionado)
+    /// </summary>
+    /// <param name="request">Credenciales de login</param>
+    /// <returns>Token de autenticación y datos del usuario</returns>
+    [HttpPost("/api/auth/login")]
+    [ProducesResponseType(typeof(ApiResponse<AuthResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<AuthResponse>>> LoginAlternative([FromBody] LoginRequest request)
+    {
+        return await Login(request);
+    }
+
+    /// <summary>
+    /// Registro de nuevo usuario (ruta alternativa sin versionado)
+    /// </summary>
+    /// <param name="request">Datos del nuevo usuario</param>
+    /// <returns>Token de autenticación y datos del usuario registrado</returns>
+    [HttpPost("/api/auth/register")]
+    [ProducesResponseType(typeof(ApiResponse<AuthResponse>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<AuthResponse>>> RegisterAlternative([FromBody] RegisterRequest request)
+    {
+        return await Register(request);
+    }
 }

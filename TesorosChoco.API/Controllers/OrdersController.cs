@@ -198,9 +198,7 @@ public class OrdersController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError, 
                 ApiResponse<OrderDto>.ErrorResponse("An error occurred while updating order status"));
         }
-    }
-
-    /// <summary>
+    }    /// <summary>
     /// Obtiene el ID del usuario actual desde el token JWT
     /// </summary>
     /// <returns>ID del usuario</returns>
@@ -212,5 +210,69 @@ public class OrdersController : ControllerBase
             throw new UnauthorizedAccessException("Invalid user token");
         }
         return userId;
+    }
+
+    // Alternative routes without versioning for documentation compatibility
+    
+    /// <summary>
+    /// Crea una nueva orden de compra (ruta alternativa sin versionado)
+    /// </summary>
+    /// <param name="request">Datos de la orden</param>
+    /// <returns>Orden creada</returns>
+    [HttpPost("/api/orders")]
+    [ProducesResponseType(typeof(ApiResponse<OrderDto>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<OrderDto>>> CreateOrderAlternative([FromBody] CreateOrderRequest request)
+    {
+        return await CreateOrder(request);
+    }
+
+    /// <summary>
+    /// Obtiene una orden específica por su ID (ruta alternativa sin versionado)
+    /// </summary>
+    /// <param name="id">ID de la orden</param>
+    /// <returns>Orden específica</returns>
+    [HttpGet("/api/orders/{id}")]
+    [ProducesResponseType(typeof(ApiResponse<OrderDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<OrderDto>>> GetOrderAlternative(int id)
+    {
+        return await GetOrder(id);
+    }    /// <summary>
+    /// Obtiene las órdenes del usuario autenticado (ruta alternativa sin versionado)
+    /// </summary>
+    /// <returns>Lista de órdenes del usuario</returns>
+    [HttpGet("/api/orders/user/{userId}")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<OrderDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<OrderDto>>>> GetOrdersByUserIdAlternative(int userId)
+    {
+        return await GetOrdersByUserId(userId);
+    }
+
+    /// <summary>
+    /// Actualiza el estado de una orden (ruta alternativa sin versionado)
+    /// </summary>
+    /// <param name="id">ID de la orden</param>
+    /// <param name="request">Nuevo estado</param>
+    /// <returns>Orden con estado actualizado</returns>
+    [HttpPatch("/api/orders/{id}/status")]
+    [ProducesResponseType(typeof(ApiResponse<OrderDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<OrderDto>>> UpdateOrderStatusAlternative(int id, [FromBody] UpdateOrderStatusRequest request)
+    {
+        return await UpdateOrderStatus(id, request);
     }
 }
