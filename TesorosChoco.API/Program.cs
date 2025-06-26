@@ -116,7 +116,7 @@ try
     });
 
     var app = builder.Build();    // Ensure database is created and seeded
-    await app.Services.EnsureDatabaseCreatedAsync();
+    // await app.Services.EnsureDatabaseCreatedAsync();
     
     // Configure the HTTP request pipeline
     if (app.Environment.IsDevelopment())
