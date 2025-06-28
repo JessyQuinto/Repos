@@ -42,12 +42,20 @@ try
         {
             context.ProblemDetails.Instance = context.HttpContext.Request.Path;
             context.ProblemDetails.Extensions.TryAdd("traceId", context.HttpContext.TraceIdentifier);
+            
+            // En producción, no exponer detalles técnicos
+            if (!builder.Environment.IsDevelopment())
+            {
+                context.ProblemDetails.Detail = "An error occurred processing your request.";
+            }
         };
     });
     
     // Add FluentValidation
     builder.Services.AddFluentValidationAutoValidation()
-                    .AddFluentValidationClientsideAdapters();    // Add Infrastructure and Application layers
+                    .AddFluentValidationClientsideAdapters();
+
+    // Add Infrastructure and Application layers
     builder.Services.AddInfrastructure(builder.Configuration);
     builder.Services.AddApplication();
     
@@ -56,26 +64,47 @@ try
     {
         opt.DefaultApiVersion = new ApiVersion(1, 0);
         opt.AssumeDefaultVersionWhenUnspecified = true;
-    });    builder.Services.AddVersionedApiExplorer(setup =>
+    });
+
+    builder.Services.AddVersionedApiExplorer(setup =>
     {
         setup.GroupNameFormat = "'v'VVV";
         setup.SubstituteApiVersionInUrl = true;
     });
     
-    // Add CORS
+    // Add CORS - Mejorado con configuración más segura
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("AllowFrontend", policy =>
         {
-            policy.WithOrigins(
-                    "http://localhost:3000", "https://localhost:3000", // React app URLs
-                    "http://localhost:8080", "https://localhost:8080", // Vite default URLs
-                    "http://localhost:5173", "https://localhost:5173"  // Vite alternative URLs
-                  )
-                  .AllowAnyHeader()
-                  .AllowAnyMethod()
-                  .AllowCredentials();
+            if (builder.Environment.IsDevelopment())
+            {
+                policy.WithOrigins(
+                        "http://localhost:3000", "https://localhost:3000", // React app URLs
+                        "http://localhost:8080", "https://localhost:8080", // Vite default URLs
+                        "http://localhost:5173", "https://localhost:5173"  // Vite alternative URLs
+                      )
+                      .AllowAnyHeader()
+                      .AllowAnyMethod()
+                      .AllowCredentials();
+            }
+            else
+            {
+                // En producción, especificar dominios exactos
+                policy.WithOrigins("https://yourdomain.com")
+                      .WithHeaders("Content-Type", "Authorization")
+                      .WithMethods("GET", "POST", "PUT", "DELETE")
+                      .AllowCredentials();
+            }
         });
+    });
+
+    // Add Security Headers
+    builder.Services.AddHsts(options =>
+    {
+        options.Preload = true;
+        options.IncludeSubDomains = true;
+        options.MaxAge = TimeSpan.FromDays(365);
     });
 
     // Add Swagger/OpenAPI
@@ -115,7 +144,9 @@ try
         });
     });
 
-    var app = builder.Build();    // Ensure database is created and seeded
+    var app = builder.Build();
+
+    // Ensure database is created and seeded
     // await app.Services.EnsureDatabaseCreatedAsync();
     
     // Configure the HTTP request pipeline
@@ -133,9 +164,24 @@ try
     {
         app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
         app.UseHsts();
+        
+        // Agregar cabeceras de seguridad adicionales
+        app.Use(async (context, next) =>
+        {
+            context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+            context.Response.Headers["X-Frame-Options"] = "DENY";
+            context.Response.Headers["X-XSS-Protection"] = "1; mode=block";
+            context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+            await next();
+        });
     }
 
-    app.UseHttpsRedirection();
+    // Forzar HTTPS en producción
+    if (!app.Environment.IsDevelopment())
+    {
+        app.UseHttpsRedirection();
+    }
+    
     app.UseCors("AllowFrontend");
     
     app.UseAuthentication();
