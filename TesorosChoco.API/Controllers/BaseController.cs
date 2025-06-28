@@ -28,6 +28,22 @@ public abstract class BaseController : ControllerBase
     }
 
     /// <summary>
+    /// Obtiene el ID del usuario autenticado de forma segura
+    /// </summary>
+    /// <returns>ID del usuario si está autenticado, null en caso contrario</returns>
+    protected int? GetCurrentUserIdSafe()
+    {
+        try
+        {
+            return GetCurrentUserId();
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
     /// Verifica si el usuario actual es administrador
     /// </summary>
     /// <returns>True si el usuario es administrador</returns>
@@ -43,14 +59,7 @@ public abstract class BaseController : ControllerBase
     /// <returns>True si puede acceder (es el mismo usuario o es administrador)</returns>
     protected bool CanAccessUserResource(int targetUserId)
     {
-        try
-        {
-            var currentUserId = GetCurrentUserId();
-            return currentUserId == targetUserId || IsCurrentUserAdmin();
-        }
-        catch (UnauthorizedAccessException)
-        {
-            return false;
-        }
+        var currentUserId = GetCurrentUserIdSafe();
+        return currentUserId.HasValue && (currentUserId.Value == targetUserId || IsCurrentUserAdmin());
     }
 }

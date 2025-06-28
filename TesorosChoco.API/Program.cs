@@ -16,6 +16,8 @@ using System.Text.Json;
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(new ConfigurationBuilder()
         .AddJsonFile("appsettings.json")
+        .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
+        .AddEnvironmentVariables()
         .Build())
     .CreateLogger();
 
@@ -26,6 +28,9 @@ try
 
     // Add Serilog for structured logging
     builder.Host.UseSerilog();
+    
+    // Validate critical configuration
+    ValidateConfiguration(builder.Configuration);
     
     // Add services to the container
     builder.Services.AddControllers()
@@ -199,4 +204,24 @@ catch (Exception ex)
 finally
 {
     Log.CloseAndFlush();
+}
+
+static void ValidateConfiguration(IConfiguration configuration)
+{
+    var jwtKey = configuration["Jwt:Key"];
+    var jwtIssuer = configuration["Jwt:Issuer"];
+    var jwtAudience = configuration["Jwt:Audience"];
+    var connectionString = configuration.GetConnectionString("DefaultConnection");
+
+    if (string.IsNullOrWhiteSpace(jwtKey))
+        throw new InvalidOperationException("JWT Key is not configured");
+    
+    if (string.IsNullOrWhiteSpace(jwtIssuer))
+        throw new InvalidOperationException("JWT Issuer is not configured");
+    
+    if (string.IsNullOrWhiteSpace(jwtAudience))
+        throw new InvalidOperationException("JWT Audience is not configured");
+    
+    if (string.IsNullOrWhiteSpace(connectionString))
+        throw new InvalidOperationException("Database connection string is not configured");
 }

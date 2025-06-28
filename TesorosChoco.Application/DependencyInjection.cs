@@ -21,24 +21,30 @@ public static class DependencyInjection
         var assembly = Assembly.GetExecutingAssembly();
 
         // AutoMapper
-        services.AddAutoMapper(typeof(MappingProfile).Assembly);        // MediatR for CQRS pattern with pipeline behaviors (order matters!)
+        services.AddAutoMapper(typeof(MappingProfile).Assembly);
+        
+        // MediatR for CQRS pattern with pipeline behaviors (order matters!)
         services.AddMediatR(cfg => {
             cfg.RegisterServicesFromAssembly(assembly);
             cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
             cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(PerformanceBehavior<,>));
             cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ExceptionHandlingBehavior<,>));
-        });        // FluentValidation
-        services.AddValidatorsFromAssembly(assembly);        // Business Rules Validators
+        });
+        
+        // FluentValidation
+        services.AddValidatorsFromAssembly(assembly);
+        
+        // Business Rules Validators
         services.AddScoped<CreateOrderBusinessRulesValidator>();
         services.AddScoped<TesorosChoco.Application.Validators.Orders.OrderValueAndLimitsValidator>();
         services.AddScoped<TesorosChoco.Application.Validators.Orders.OrderTimeAndRegionValidator>();
         services.AddScoped<TesorosChoco.Application.Validators.Products.ProductBusinessRulesValidator>();
 
-        // Application Services (legacy - will be gradually replaced by CQRS)
+        // Application Services (Keep only non-CQRS services)
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
-        services.AddScoped<IProductService, ProductService>();
+        // Note: ProductService removed - using CQRS handlers instead
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IProducerService, ProducerService>();
         services.AddScoped<ICartService, CartService>();

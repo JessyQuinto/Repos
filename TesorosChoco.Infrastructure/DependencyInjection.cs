@@ -56,6 +56,11 @@ public static class DependencyInjection
         .AddDefaultTokenProviders();        // JWT Authentication
         var jwtSettings = configuration.GetSection("Jwt");
         var secretKey = jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key not configured");
+        var issuer = jwtSettings["Issuer"] ?? throw new InvalidOperationException("JWT Issuer not configured");
+        var audience = jwtSettings["Audience"] ?? throw new InvalidOperationException("JWT Audience not configured");
+        
+        if (secretKey.Length < 32)
+            throw new InvalidOperationException("JWT Key must be at least 32 characters long for security");
         
         services.AddAuthentication(options =>
         {
@@ -71,8 +76,8 @@ public static class DependencyInjection
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = jwtSettings["Issuer"],
-                ValidAudience = jwtSettings["Audience"],
+                ValidIssuer = issuer,
+                ValidAudience = audience,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
                 ClockSkew = TimeSpan.Zero
             };
@@ -83,7 +88,8 @@ public static class DependencyInjection
                 {
                     context.Response.StatusCode = 401;
                     return Task.CompletedTask;
-                },                OnChallenge = context =>
+                },
+                OnChallenge = context =>
                 {
                     context.HandleResponse();
                     context.Response.StatusCode = 401;
@@ -102,16 +108,19 @@ public static class DependencyInjection
 
         // Caching
         services.AddMemoryCache();
-        services.AddStackExchangeRedisCache(options =>
+        var redisConnectionString = configuration.GetConnectionString("RedisConnection");
+        if (!string.IsNullOrEmpty(redisConnectionString))
         {
-            var connectionString = configuration.GetConnectionString("RedisConnection");
-            if (!string.IsNullOrEmpty(connectionString))
+            services.AddStackExchangeRedisCache(options =>
             {
-                options.Configuration = connectionString;
-            }
-        });        // Infrastructure Services
-        services.AddScoped<IJwtTokenService, JwtTokenService>();
-        services.AddScoped<ITokenService, JwtTokenService>(); // Use the same instance for both interfaces
+                options.Configuration = redisConnectionString;
+            });
+        }
+        
+        // Infrastructure Services
+        services.AddScoped<JwtTokenService>(); // Register concrete class
+        services.AddScoped<IJwtTokenService>(provider => provider.GetRequiredService<JwtTokenService>());
+        services.AddScoped<ITokenService>(provider => provider.GetRequiredService<JwtTokenService>());
         services.AddScoped<IRefreshTokenService, RefreshTokenService>();
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IPasswordService, PasswordService>();
@@ -120,7 +129,8 @@ public static class DependencyInjection
         
         // Unit of Work
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-          // Inventory Management
+        
+        // Inventory Management
         services.AddScoped<IInventoryService, InventoryService>();
 
         // Background Services

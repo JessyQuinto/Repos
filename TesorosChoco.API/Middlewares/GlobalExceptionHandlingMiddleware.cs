@@ -1,8 +1,13 @@
 using System.Net;
 using System.Text.Json;
+using FluentValidation;
 
 namespace TesorosChoco.API.Middlewares;
 
+/// <summary>
+/// Global exception handling middleware for consistent error responses
+/// Implements comprehensive error handling following Azure best practices
+/// </summary>
 public class GlobalExceptionHandlingMiddleware
 {
     private readonly RequestDelegate _next;
@@ -10,8 +15,8 @@ public class GlobalExceptionHandlingMiddleware
 
     public GlobalExceptionHandlingMiddleware(RequestDelegate next, ILogger<GlobalExceptionHandlingMiddleware> logger)
     {
-        _next = next;
-        _logger = logger;
+        _next = next ?? throw new ArgumentNullException(nameof(next));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -22,7 +27,8 @@ public class GlobalExceptionHandlingMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unhandled exception has occurred: {Message}", ex.Message);
+            _logger.LogError(ex, "An unhandled exception has occurred: {Message} at {Path}", 
+                ex.Message, context.Request.Path);
             await HandleExceptionAsync(context, ex);
         }
     }
@@ -31,52 +37,74 @@ public class GlobalExceptionHandlingMiddleware
     {
         context.Response.ContentType = "application/json";
         
+        var (statusCode, title, detail) = GetErrorDetails(exception, context);
+        
         var response = new
         {
             type = "https://tools.ietf.org/html/rfc7807",
-            title = "An error occurred",
-            status = (int)HttpStatusCode.InternalServerError,
-            detail = exception.Message,
+            title,
+            status = (int)statusCode,
+            detail,
             instance = context.Request.Path.Value,
-            traceId = context.TraceIdentifier
+            traceId = context.TraceIdentifier,
+            timestamp = DateTime.UtcNow
         };
 
-        switch (exception)
-        {
-            case ArgumentException:
-                response = response with 
-                { 
-                    title = "Validation Error",
-                    status = (int)HttpStatusCode.BadRequest 
-                };
-                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-                break;
-            case UnauthorizedAccessException:
-                response = response with 
-                { 
-                    title = "Unauthorized",
-                    status = (int)HttpStatusCode.Unauthorized 
-                };
-                context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                break;
-            case KeyNotFoundException:
-                response = response with 
-                { 
-                    title = "Not Found",
-                    status = (int)HttpStatusCode.NotFound 
-                };
-                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-                break;
-            default:
-                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                break;
-        }
+        context.Response.StatusCode = (int)statusCode;
 
         var jsonResponse = JsonSerializer.Serialize(response, new JsonSerializerOptions
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            WriteIndented = false
         });
 
         await context.Response.WriteAsync(jsonResponse);
+    }
+
+    private static (HttpStatusCode statusCode, string title, string detail) GetErrorDetails(Exception exception, HttpContext context)
+    {
+        return exception switch
+        {
+            ValidationException validationEx => (
+                HttpStatusCode.BadRequest,
+                "Validation Error",
+                string.Join("; ", validationEx.Errors.Select(e => e.ErrorMessage))
+            ),
+            ArgumentNullException => (
+                HttpStatusCode.BadRequest,
+                "Bad Request",
+                "Required data is missing"
+            ),
+            ArgumentException => (
+                HttpStatusCode.BadRequest,
+                "Bad Request",
+                "Invalid request data"
+            ),
+            UnauthorizedAccessException => (
+                HttpStatusCode.Unauthorized,
+                "Unauthorized",
+                "Access denied"
+            ),
+            KeyNotFoundException => (
+                HttpStatusCode.NotFound,
+                "Not Found",
+                "The requested resource was not found"
+            ),
+            InvalidOperationException => (
+                HttpStatusCode.Conflict,
+                "Conflict",
+                "The operation cannot be completed due to the current state"
+            ),
+            TimeoutException => (
+                HttpStatusCode.RequestTimeout,
+                "Request Timeout",
+                "The request timed out"
+            ),
+            _ => (
+                HttpStatusCode.InternalServerError,
+                "Internal Server Error",
+                "An unexpected error occurred"
+            )
+        };
     }
 }
