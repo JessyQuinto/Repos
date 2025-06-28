@@ -9,6 +9,47 @@ API backend para la plataforma de e-commerce de chocolates artesanales TesorosCh
 - Docker Desktop
 - Visual Studio 2022 / VS Code (opcional)
 
+## 🐳 Desarrollo con Docker
+
+### Opción 1: Usar script PowerShell (Recomendado)
+```powershell
+# Iniciar todos los servicios
+.\scripts\docker-dev.ps1 -Action up
+
+# Ver logs en tiempo real
+.\scripts\docker-dev.ps1 -Action logs
+
+# Ejecutar migraciones
+.\scripts\docker-dev.ps1 -Action migration
+
+# Reconstruir imágenes
+.\scripts\docker-dev.ps1 -Action build
+
+# Detener servicios
+.\scripts\docker-dev.ps1 -Action down
+```
+
+### Opción 2: Comandos Docker manuales
+```bash
+# Iniciar servicios
+docker-compose up -d
+
+# Ver logs
+docker-compose logs -f
+
+# Detener servicios
+docker-compose down
+
+# Reconstruir
+docker-compose build --no-cache
+```
+
+### Servicios disponibles después del inicio:
+- **API**: http://localhost:5000
+- **SQL Server**: localhost:1434 (usuario: sa, password: TesorosChoco123!)
+- **Redis**: localhost:6379
+- **Swagger UI**: http://localhost:5000/swagger
+
 ### Instalación Automática
 
 1. **Clona el repositorio:**
