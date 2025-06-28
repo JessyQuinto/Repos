@@ -28,11 +28,10 @@ public static class DependencyInjection
                 configuration.GetConnectionString("DefaultConnection"),
                 builder => builder.MigrationsAssembly(typeof(TesorosChocoDbContext).Assembly.FullName)));
 
-        // Identity Database Configuration (separate for security)
+        // Identity Database Configuration (using same database for simplicity)
         services.AddDbContext<ApplicationIdentityDbContext>(options =>
             options.UseSqlServer(
-                configuration.GetConnectionString("IdentityConnection") 
-                ?? configuration.GetConnectionString("DefaultConnection"),
+                configuration.GetConnectionString("DefaultConnection"),
                 builder => builder.MigrationsAssembly(typeof(ApplicationIdentityDbContext).Assembly.FullName)));
 
         // Identity Configuration

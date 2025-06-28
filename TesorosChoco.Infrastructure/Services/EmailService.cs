@@ -2,25 +2,15 @@ using System.Net;
 using System.Net.Mail;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using TesorosChoco.Domain.Interfaces;
 
 namespace TesorosChoco.Infrastructure.Services;
 
 /// <summary>
-/// Email service for sending various types of emails
+/// Email service implementation for sending various types of emails
 /// Simple text-based email service for backend API
 /// HTML templates should be handled by frontend or separate template service
 /// </summary>
-public interface IEmailService
-{
-    Task<bool> SendEmailAsync(string to, string subject, string body, bool isHtml = false);
-    Task<bool> SendEmailConfirmationAsync(string email, string firstName, string confirmationToken);
-    Task<bool> SendPasswordResetAsync(string email, string firstName, string resetToken);
-    Task<bool> SendWelcomeEmailAsync(string email, string firstName);
-    Task<bool> SendOrderConfirmationAsync(string email, string firstName, string orderNumber, decimal total);
-    Task<bool> SendContactFormNotificationAsync(string adminEmail, string customerName, string customerEmail, string message);
-    Task<bool> SendContactMessageConfirmationAsync(string email, string customerName);
-}
-
 public class EmailService : IEmailService
 {
     private readonly IConfiguration _configuration;
@@ -74,10 +64,114 @@ public class EmailService : IEmailService
         }
     }
 
-    public async Task<bool> SendEmailConfirmationAsync(string email, string firstName, string confirmationToken)
+    /// <summary>
+    /// Send order confirmation email
+    /// </summary>
+    public async Task<bool> SendOrderConfirmationAsync(string email, string customerName, int orderId, decimal total)
+    {
+        var subject = $"Confirmación de pedido #{orderId} - Tesoros del Chocó";
+        var body = $@"Hola {customerName},
+
+¡Gracias por tu pedido!
+
+Detalles del pedido:
+- Número de pedido: #{orderId}
+- Total: ${total:N0} COP
+- Fecha: {DateTime.Now:dd/MM/yyyy HH:mm}
+
+Tu pedido ha sido recibido y está siendo procesado.
+
+Te notificaremos cuando tu pedido sea enviado.
+
+Puedes consultar el estado de tu pedido en cualquier momento desde tu cuenta.
+
+Saludos cordiales,
+El equipo de Tesoros del Chocó
+
+© 2025 Tesoros del Chocó. Todos los derechos reservados.";
+        
+        return await SendEmailAsync(email, subject, body);
+    }
+
+    /// <summary>
+    /// Send order status update email
+    /// </summary>
+    public async Task<bool> SendOrderStatusUpdateAsync(string email, string customerName, int orderId, string status)
+    {
+        var subject = $"Actualización de pedido #{orderId} - Tesoros del Chocó";
+        var body = $@"Hola {customerName},
+
+Tu pedido #{orderId} ha sido actualizado.
+
+Nuevo estado: {status}
+
+Puedes consultar más detalles en tu cuenta.
+
+Saludos cordiales,
+El equipo de Tesoros del Chocó";
+        
+        return await SendEmailAsync(email, subject, body);
+    }
+
+    /// <summary>
+    /// Send newsletter email
+    /// </summary>
+    public async Task<bool> SendNewsletterAsync(string email, string subject, string content)
+    {
+        return await SendEmailAsync(email, subject, content, true);
+    }
+
+    /// <summary>
+    /// Send contact form response
+    /// </summary>
+    public async Task<bool> SendContactResponseAsync(string email, string name, string response)
+    {
+        var subject = "Respuesta a tu consulta - Tesoros del Chocó";
+        var body = $@"Hola {name},
+
+Gracias por contactarnos. Aquí está nuestra respuesta:
+
+{response}
+
+Si tienes más preguntas, no dudes en contactarnos.
+
+Saludos cordiales,
+El equipo de Tesoros del Chocó";
+        
+        return await SendEmailAsync(email, subject, body);
+    }
+
+    /// <summary>
+    /// Send password reset email
+    /// </summary>
+    public async Task<bool> SendPasswordResetAsync(string email, string resetToken)
+    {
+        var subject = "Código para restablecer contraseña - Tesoros del Chocó";
+        var body = $@"Hola,
+
+Recibimos una solicitud para restablecer la contraseña de tu cuenta en Tesoros del Chocó.
+
+Usa el siguiente código para restablecer tu contraseña:
+
+Código de restablecimiento: {resetToken}
+
+Este código expirará en 1 hora por razones de seguridad.
+
+Si no solicitaste este cambio, puedes ignorar este correo.
+
+Saludos cordiales,
+El equipo de Tesoros del Chocó";
+        
+        return await SendEmailAsync(email, subject, body);
+    }
+
+    /// <summary>
+    /// Send email confirmation
+    /// </summary>
+    public async Task<bool> SendEmailConfirmationAsync(string email, string confirmationToken)
     {
         var subject = "Confirma tu dirección de correo electrónico - Tesoros del Chocó";
-        var body = $@"Hola {firstName},
+        var body = $@"Hola,
 
 ¡Bienvenido a Tesoros del Chocó!
 
@@ -90,34 +184,20 @@ Este código expirará en 24 horas por razones de seguridad.
 Si no creaste esta cuenta, puedes ignorar este correo.
 
 Saludos cordiales,
-El equipo de Tesoros del Chocó
-
-© 2025 Tesoros del Chocó. Todos los derechos reservados.";
+El equipo de Tesoros del Chocó";
         
         return await SendEmailAsync(email, subject, body);
     }
 
+    // Métodos adicionales para compatibilidad
+    public async Task<bool> SendEmailConfirmationAsync(string email, string firstName, string confirmationToken)
+    {
+        return await SendEmailConfirmationAsync(email, confirmationToken);
+    }
+
     public async Task<bool> SendPasswordResetAsync(string email, string firstName, string resetToken)
     {
-        var subject = "Código para restablecer contraseña - Tesoros del Chocó";
-        var body = $@"Hola {firstName},
-
-Recibimos una solicitud para restablecer la contraseña de tu cuenta en Tesoros del Chocó.
-
-Usa el siguiente código para restablecer tu contraseña:
-
-Código de restablecimiento: {resetToken}
-
-Este código expirará en 1 hora por razones de seguridad.
-
-Si no solicitaste este cambio, puedes ignorar este correo. Tu contraseña seguirá siendo la misma.
-
-Saludos cordiales,
-El equipo de Tesoros del Chocó
-
-© 2025 Tesoros del Chocó. Todos los derechos reservados.";
-        
-        return await SendEmailAsync(email, subject, body);
+        return await SendPasswordResetAsync(email, resetToken);
     }
 
     public async Task<bool> SendWelcomeEmailAsync(string email, string firstName)
@@ -136,35 +216,7 @@ Tu cuenta ha sido creada exitosamente. Ahora puedes:
 Gracias por unirte a nuestra comunidad.
 
 Saludos cordiales,
-El equipo de Tesoros del Chocó
-
-© 2025 Tesoros del Chocó. Todos los derechos reservados.";
-        
-        return await SendEmailAsync(email, subject, body);
-    }
-
-    public async Task<bool> SendOrderConfirmationAsync(string email, string firstName, string orderNumber, decimal total)
-    {
-        var subject = $"Confirmación de pedido #{orderNumber} - Tesoros del Chocó";
-        var body = $@"Hola {firstName},
-
-¡Gracias por tu pedido!
-
-Detalles del pedido:
-- Número de pedido: #{orderNumber}
-- Total: ${total:N0} COP
-- Fecha: {DateTime.Now:dd/MM/yyyy HH:mm}
-
-Tu pedido ha sido recibido y está siendo procesado.
-
-Te notificaremos cuando tu pedido sea enviado.
-
-Puedes consultar el estado de tu pedido en cualquier momento desde tu cuenta.
-
-Saludos cordiales,
-El equipo de Tesoros del Chocó
-
-© 2025 Tesoros del Chocó. Todos los derechos reservados.";
+El equipo de Tesoros del Chocó";
         
         return await SendEmailAsync(email, subject, body);
     }
@@ -198,9 +250,7 @@ Nos pondremos en contacto contigo en las próximas 24-48 horas.
 ¡Gracias por tu interés en Tesoros del Chocó!
 
 Saludos cordiales,
-El equipo de Tesoros del Chocó
-
-© 2025 Tesoros del Chocó. Todos los derechos reservados.";
+El equipo de Tesoros del Chocó";
         
         return await SendEmailAsync(email, subject, body);
     }

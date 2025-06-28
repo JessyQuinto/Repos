@@ -64,14 +64,14 @@ public class CreateOrderBusinessRulesValidator : AbstractValidator<CreateOrderRe
 
     private async Task<bool> UserMustExist(int userId, CancellationToken cancellationToken)
     {
-        var user = await _productRepository.GetByIdAsync(userId);
+        var user = await _userRepository.GetByIdAsync(userId);
         return user != null;
     }
 
     private async Task<bool> UserMustBeActive(int userId, CancellationToken cancellationToken)
     {
         var user = await _userRepository.GetByIdAsync(userId);
-        return user != null; // Add IsActive property to User entity if needed
+        return user?.IsActive == true;
     }
 
     private async Task<bool> ProductMustExist(int productId, CancellationToken cancellationToken)

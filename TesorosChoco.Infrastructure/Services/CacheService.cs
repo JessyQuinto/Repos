@@ -1,22 +1,14 @@
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using TesorosChoco.Domain.Interfaces;
 
 namespace TesorosChoco.Infrastructure.Services;
 
 /// <summary>
-/// Cache service abstraction for distributed caching
+/// Cache service implementation using distributed caching
 /// Provides a simplified interface for caching operations with JSON serialization
 /// </summary>
-public interface ICacheService
-{
-    Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default) where T : class;
-    Task SetAsync<T>(string key, T value, TimeSpan? expiration = null, CancellationToken cancellationToken = default) where T : class;
-    Task RemoveAsync(string key, CancellationToken cancellationToken = default);
-    Task RemoveByPatternAsync(string pattern, CancellationToken cancellationToken = default);
-    Task<bool> ExistsAsync(string key, CancellationToken cancellationToken = default);
-}
-
 public class CacheService : ICacheService
 {
     private readonly IDistributedCache _distributedCache;
@@ -34,11 +26,11 @@ public class CacheService : ICacheService
         };
     }
 
-    public async Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default) where T : class
+    public async Task<T?> GetAsync<T>(string key) where T : class
     {
         try
         {
-            var cachedValue = await _distributedCache.GetStringAsync(key, cancellationToken);
+            var cachedValue = await _distributedCache.GetStringAsync(key);
             
             if (string.IsNullOrEmpty(cachedValue))
                 return null;
@@ -52,7 +44,7 @@ public class CacheService : ICacheService
         }
     }
 
-    public async Task SetAsync<T>(string key, T value, TimeSpan? expiration = null, CancellationToken cancellationToken = default) where T : class
+    public async Task SetAsync<T>(string key, T value, TimeSpan? expiration = null) where T : class
     {
         try
         {
@@ -70,7 +62,7 @@ public class CacheService : ICacheService
                 options.SetAbsoluteExpiration(TimeSpan.FromHours(1));
             }
 
-            await _distributedCache.SetStringAsync(key, serializedValue, options, cancellationToken);
+            await _distributedCache.SetStringAsync(key, serializedValue, options);
             
             _logger.LogDebug("Cached value set for key: {Key}", key);
         }
@@ -80,18 +72,20 @@ public class CacheService : ICacheService
         }
     }
 
-    public async Task RemoveAsync(string key, CancellationToken cancellationToken = default)
+    public async Task RemoveAsync(string key)
     {
         try
         {
-            await _distributedCache.RemoveAsync(key, cancellationToken);
+            await _distributedCache.RemoveAsync(key);
             _logger.LogDebug("Cached value removed for key: {Key}", key);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error removing cached value for key: {Key}", key);
         }
-    }    public Task RemoveByPatternAsync(string pattern, CancellationToken cancellationToken = default)
+    }
+
+    public Task RemoveByPatternAsync(string pattern)
     {
         // Note: This is a simplified implementation. For Redis, you'd use SCAN with pattern matching
         // For MemoryCache, this would require tracking keys separately
@@ -108,17 +102,31 @@ public class CacheService : ICacheService
         }
     }
 
-    public async Task<bool> ExistsAsync(string key, CancellationToken cancellationToken = default)
+    public async Task<bool> ExistsAsync(string key)
     {
         try
         {
-            var cachedValue = await _distributedCache.GetStringAsync(key, cancellationToken);
+            var cachedValue = await _distributedCache.GetStringAsync(key);
             return !string.IsNullOrEmpty(cachedValue);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error checking if cached value exists for key: {Key}", key);
             return false;
+        }
+    }
+
+    public async Task ClearAsync()
+    {
+        try
+        {
+            _logger.LogWarning("ClearAsync is not fully implemented for this cache provider");
+            // This would require provider-specific implementation
+            await Task.CompletedTask;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error clearing cache");
         }
     }
 }
