@@ -28,13 +28,7 @@ public static class DependencyInjection
                 configuration.GetConnectionString("DefaultConnection"),
                 builder => builder.MigrationsAssembly(typeof(TesorosChocoDbContext).Assembly.FullName)));
 
-        // Identity Database Configuration (using same database for simplicity)
-        services.AddDbContext<ApplicationIdentityDbContext>(options =>
-            options.UseSqlServer(
-                configuration.GetConnectionString("DefaultConnection"),
-                builder => builder.MigrationsAssembly(typeof(ApplicationIdentityDbContext).Assembly.FullName)));
-
-        // Identity Configuration
+        // Identity Configuration (using the same database context)
         services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
         {
             // Password settings
@@ -58,7 +52,7 @@ public static class DependencyInjection
             options.SignIn.RequireConfirmedEmail = false; // Set to true in production
             options.SignIn.RequireConfirmedPhoneNumber = false;
         })
-        .AddEntityFrameworkStores<ApplicationIdentityDbContext>()
+        .AddEntityFrameworkStores<TesorosChocoDbContext>()
         .AddDefaultTokenProviders();        // JWT Authentication
         var jwtSettings = configuration.GetSection("Jwt");
         var secretKey = jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key not configured");
@@ -158,12 +152,10 @@ public static class DependencyInjection
         using var scope = serviceProvider.CreateScope();
         
         var context = scope.ServiceProvider.GetRequiredService<TesorosChocoDbContext>();
-        var identityContext = scope.ServiceProvider.GetRequiredService<ApplicationIdentityDbContext>();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
 
-        // Ensure databases are created
+        // Ensure database is created
         await context.Database.EnsureCreatedAsync();
-        await identityContext.Database.EnsureCreatedAsync();
 
         // Seed default roles
         await SeedRolesAsync(roleManager);
