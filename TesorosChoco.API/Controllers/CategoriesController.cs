@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using MediatR;
 using TesorosChoco.Application.DTOs;
 using TesorosChoco.Application.Interfaces;
+using TesorosChoco.Application.Queries.Products;
 using TesorosChoco.API.Common;
 
 namespace TesorosChoco.API.Controllers;
@@ -8,20 +10,20 @@ namespace TesorosChoco.API.Controllers;
 [ApiController]
 [Route("api/v1/categories")]
 [Produces("application/json")]
-public class CategoriesController : ControllerBase
+public class CategoriesController : BaseController
 {
     private readonly ICategoryService _categoryService;
-    private readonly IProductService _productService;
+    private readonly IMediator _mediator;
     private readonly ILogger<CategoriesController> _logger;
 
     public CategoriesController(
-        ICategoryService categoryService, 
-        IProductService productService,
+        ICategoryService categoryService,
+        IMediator mediator,
         ILogger<CategoriesController> logger)
     {
-        _categoryService = categoryService;
-        _productService = productService;
-        _logger = logger;
+        _categoryService = categoryService ?? throw new ArgumentNullException(nameof(categoryService));
+        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }    /// <summary>
     /// Obtiene todas las categorías de productos
     /// </summary>
@@ -97,7 +99,8 @@ public class CategoriesController : ControllerBase
                 return NotFound(ApiResponse.ErrorResponse($"Category with ID {categoryId} was not found"));
             }
             
-            var products = await _productService.GetProductsByCategoryAsync(categoryId);
+            var query = new GetAllProductsQuery { CategoryId = categoryId };
+            var products = await _mediator.Send(query);
             
             _logger.LogInformation("Retrieved {Count} products for category {CategoryId}", products.Count(), categoryId);
             return Ok(ApiResponse<IEnumerable<ProductDto>>.SuccessResponse(products, "Products retrieved successfully"));

@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using MediatR;
 using TesorosChoco.Application.DTOs;
 using TesorosChoco.Application.Interfaces;
+using TesorosChoco.Application.Queries.Products;
 using TesorosChoco.API.Common;
 
 namespace TesorosChoco.API.Controllers;
@@ -8,20 +10,20 @@ namespace TesorosChoco.API.Controllers;
 [ApiController]
 [Route("api/v1/producers")]
 [Produces("application/json")]
-public class ProducersController : ControllerBase
+public class ProducersController : BaseController
 {
     private readonly IProducerService _producerService;
-    private readonly IProductService _productService;
+    private readonly IMediator _mediator;
     private readonly ILogger<ProducersController> _logger;
 
     public ProducersController(
-        IProducerService producerService, 
-        IProductService productService,
+        IProducerService producerService,
+        IMediator mediator,
         ILogger<ProducersController> logger)
     {
-        _producerService = producerService;
-        _productService = productService;
-        _logger = logger;
+        _producerService = producerService ?? throw new ArgumentNullException(nameof(producerService));
+        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }    /// <summary>
     /// Obtiene todos los productores/artesanos
     /// </summary>
@@ -99,7 +101,8 @@ public class ProducersController : ControllerBase
                 return NotFound(ApiResponse.ErrorResponse($"Producer with ID {producerId} was not found"));
             }
             
-            var products = await _productService.GetProductsByProducerAsync(producerId);
+            var query = new GetAllProductsQuery { ProducerId = producerId };
+            var products = await _mediator.Send(query);
             
             _logger.LogInformation("Retrieved {Count} products for producer {ProducerId}", products.Count(), producerId);
             return Ok(ApiResponse<IEnumerable<ProductDto>>.SuccessResponse(products, "Products retrieved successfully"));
