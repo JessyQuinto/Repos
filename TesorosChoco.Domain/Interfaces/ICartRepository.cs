@@ -9,5 +9,4 @@ public interface ICartRepository
     Task<Cart> CreateAsync(Cart cart);
     Task<Cart> UpdateAsync(Cart cart);
     Task DeleteAsync(int id);
-    Task<Cart> AddAsync(Cart cart);
 }

@@ -129,12 +129,4 @@ public class CartRepository : BaseRepository<Cart>, ICartRepository
             throw new InvalidOperationException($"Error deleting cart with ID {id}", ex);
         }
     }
-
-    /// <summary>
-    /// Add a new cart - alias for CreateAsync for backwards compatibility
-    /// </summary>
-    public async Task<Cart> AddAsync(Cart cart)
-    {
-        return await CreateAsync(cart);
-    }
 }

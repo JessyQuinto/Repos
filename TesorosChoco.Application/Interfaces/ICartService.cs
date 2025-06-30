@@ -10,7 +10,6 @@ public interface ICartService
     Task<CartDto> AddToCartAsync(int userId, AddCartItemRequest request);
     Task<CartDto> RemoveFromCartAsync(int userId, int productId);
     Task<CartDto> UpdateItemAsync(int userId, int itemId, UpdateCartItemRequest request);
-    Task<CartDto> RemoveItemAsync(int userId, int itemId);
     Task ClearCartAsync(int userId);
     
     // Stock reservation methods

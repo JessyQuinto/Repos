@@ -48,9 +48,9 @@ public class ProductCommandHandler :
             product.CreatedAt = DateTime.UtcNow;
             product.UpdatedAt = DateTime.UtcNow;
 
-            await _productRepository.AddAsync(product);
+            var createdProduct = await _productRepository.CreateAsync(product);
             
-            var result = _mapper.Map<ProductDto>(product);
+            var result = _mapper.Map<ProductDto>(createdProduct);
             _logger.LogInformation("Product created successfully with ID: {ProductId}", product.Id);
             
             return result;

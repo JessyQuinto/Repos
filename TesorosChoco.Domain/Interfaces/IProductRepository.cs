@@ -13,6 +13,5 @@ public interface IProductRepository
     Task<(IEnumerable<Product> Products, int Total)> SearchProductsAsync(string? searchTerm = null, int? categoryId = null, decimal? minPrice = null, decimal? maxPrice = null, int? producerId = null, bool? featured = null, int limit = 10, int offset = 0);
     Task<Product> CreateAsync(Product product);
     Task<Product> UpdateAsync(Product product);
-    Task AddAsync(Product product);
     Task DeleteAsync(int id);
 }

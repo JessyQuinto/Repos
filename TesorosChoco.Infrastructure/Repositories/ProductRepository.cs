@@ -223,17 +223,4 @@ public class ProductRepository : BaseRepository<Product>, IProductRepository
             throw new InvalidOperationException($"Error deleting product {id}", ex);
         }
     }
-
-    public async Task AddAsync(Product product)
-    {
-        try
-        {
-            _dbSet.Add(product);
-            await _context.SaveChangesAsync();
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException("Error adding product", ex);
-        }
-    }
 }
