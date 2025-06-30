@@ -49,7 +49,7 @@ services:
       - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=TesorosChocoDB;User Id=sa;Password=TesorosChoco123!;TrustServerCertificate=true;
       - ConnectionStrings__RedisConnection=redis:6379
     ports:
-      - "5000:8080"
+      - "5001:8080"
     depends_on:
       sqlserver:
         condition: service_healthy
