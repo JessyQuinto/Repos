@@ -235,6 +235,62 @@ GET /api/v1/products?featured=true&categoryId=1&page=1&pageSize=20
 ### `DELETE /api/v1/cart` 🔒
 **Descripción**: Vacía el carrito completamente.
 
+### `POST /api/v1/cart/checkout` 🔒
+**Descripción**: Convierte el carrito en una orden y procede con el checkout.
+
+**Request Body**:
+```json
+{
+  "paymentMethod": "CreditCard",
+  "shippingAddress": {
+    "name": "Juan Pérez",
+    "address": "Calle 123 #45-67",
+    "city": "Bogotá",
+    "region": "Cundinamarca",
+    "zipCode": "110111",
+    "phone": "+57 300 123 4567"
+  },
+  "notes": "Entregar en portería"
+}
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "userId": 1,
+    "status": "Pending",
+    "items": [
+      {
+        "productId": 1,
+        "quantity": 2,
+        "price": 12000
+      }
+    ],
+    "shippingAddress": {
+      "name": "Juan Pérez",
+      "address": "Calle 123 #45-67",
+      "city": "Bogotá",
+      "zipCode": "110111",
+      "phone": "+57 300 123 4567"
+    },
+    "paymentMethod": "CreditCard",
+    "total": 24000,
+    "createdAt": "2025-06-30T10:30:00Z",
+    "updatedAt": "2025-06-30T10:30:00Z"
+  },
+  "message": "Order created successfully from cart"
+}
+```
+
+**⚠️ Nota importante**: Este endpoint:
+- Valida que el carrito tenga items
+- Verifica disponibilidad de stock
+- Crea la orden automáticamente
+- **Vacía el carrito** tras crear la orden exitosamente
+
 ---
 
 ## 📦 Órdenes

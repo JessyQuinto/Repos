@@ -16,7 +16,9 @@ public class CartService : ICartService
     private readonly ICartRepository _cartRepository;
     private readonly IProductRepository _productRepository;
     private readonly IInventoryService _inventoryService;
-    private readonly IMapper _mapper;    public CartService(
+    private readonly IMapper _mapper;
+
+    public CartService(
         ICartRepository cartRepository,
         IProductRepository productRepository,
         IInventoryService inventoryService,
@@ -349,6 +351,50 @@ public class CartService : ICartService
         catch (Exception ex)
         {
             throw new InvalidOperationException($"Error validating cart stock for user {userId}", ex);
+        }
+    }
+
+    /// <summary>
+    /// Prepares cart for checkout by creating order request and validating stock
+    /// Returns order request that can be used to create the actual order
+    /// </summary>
+    public async Task<CreateOrderRequest> PrepareCheckoutAsync(int userId, CheckoutCartRequest request)
+    {
+        try
+        {
+            // Get user's cart
+            var cart = await _cartRepository.GetByUserIdAsync(userId);
+            if (cart == null || !cart.Items.Any())
+                throw new InvalidOperationException("Cart is empty or does not exist");
+
+            // Validate cart stock before checkout
+            var stockValid = await ValidateCartStockAsync(userId);
+            if (!stockValid)
+                throw new InvalidOperationException("Some items in cart are out of stock");
+
+            // Convert cart items to order items
+            var orderItems = cart.Items.Select(cartItem => new OrderItemRequest
+            {
+                ProductId = cartItem.ProductId,
+                Quantity = cartItem.Quantity,
+                Price = cartItem.Price
+            }).ToList();
+
+            // Create order request from cart
+            var createOrderRequest = new CreateOrderRequest
+            {
+                UserId = userId,
+                Items = orderItems,
+                ShippingAddress = request.ShippingAddress,
+                PaymentMethod = request.PaymentMethod,
+                Total = cart.Total
+            };
+
+            return createOrderRequest;
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Error preparing cart checkout for user {userId}", ex);
         }
     }
 }

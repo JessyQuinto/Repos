@@ -25,3 +25,10 @@ public class UpdateCartItemRequest
 {
     public int Quantity { get; set; }
 }
+
+public class CheckoutCartRequest
+{
+    public string PaymentMethod { get; set; } = string.Empty;
+    public ShippingAddressRequest ShippingAddress { get; set; } = new();
+    public string? Notes { get; set; }
+}

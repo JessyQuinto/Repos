@@ -322,4 +322,61 @@ public class CartController : BaseController
                 ApiResponse.ErrorResponse("An error occurred while validating stock"));
         }
     }
+
+    /// <summary>
+    /// Convierte el carrito en una orden y procede con el checkout
+    /// </summary>
+    /// <param name="request">Datos del checkout</param>
+    /// <returns>Orden creada</returns>
+    [HttpPost("checkout")]
+    [ProducesResponseType(typeof(ApiResponse<OrderDto>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<OrderDto>>> CheckoutCart([FromBody] CheckoutCartRequest request)
+    {
+        try
+        {
+            var userId = GetCurrentUserId();
+            _logger.LogInformation("Starting checkout process for user: {UserId}", userId);
+            
+            // Validate cart has items before checkout
+            var cart = await _cartService.GetCartByUserIdAsync(userId);
+            if (cart.Items.Count == 0)
+            {
+                _logger.LogWarning("Checkout attempted with empty cart for user: {UserId}", userId);
+                return BadRequest(ApiResponse<OrderDto>.ErrorResponse("Cannot checkout with empty cart"));
+            }
+
+            // Prepare order request from cart
+            var createOrderRequest = await _cartService.PrepareCheckoutAsync(userId, request);
+            
+            // Create the order using OrderService
+            var orderService = HttpContext.RequestServices.GetRequiredService<IOrderService>();
+            var order = await orderService.CreateOrderAsync(createOrderRequest);
+
+            // Clear cart after successful order creation
+            await _cartService.ClearCartAsync(userId);
+            
+            _logger.LogInformation("Checkout completed successfully for user: {UserId}, Order: {OrderId}", userId, order.Id);
+            return StatusCode(StatusCodes.Status201Created, 
+                ApiResponse<OrderDto>.SuccessResponse(order, "Order created successfully from cart"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning("Checkout failed for user: {Message}", ex.Message);
+            return BadRequest(ApiResponse<OrderDto>.ErrorResponse(ex.Message));
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning("Invalid checkout request: {Message}", ex.Message);
+            return BadRequest(ApiResponse<OrderDto>.ErrorResponse(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during checkout process");
+            return StatusCode(StatusCodes.Status500InternalServerError, 
+                ApiResponse<OrderDto>.ErrorResponse("An error occurred during checkout"));
+        }
+    }
 }

@@ -16,4 +16,7 @@ public interface ICartService
     Task<bool> ReserveCartStockAsync(int userId, string? sessionId = null);
     Task ReleaseCartReservationsAsync(int userId);
     Task<bool> ValidateCartStockAsync(int userId);
+    
+    // Checkout method
+    Task<CreateOrderRequest> PrepareCheckoutAsync(int userId, CheckoutCartRequest request);
 }
