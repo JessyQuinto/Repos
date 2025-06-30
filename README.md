@@ -45,10 +45,10 @@ docker-compose build --no-cache
 ```
 
 ### Servicios disponibles después del inicio:
-- **API**: http://localhost:5000
+- **API (Docker)**: http://localhost:5002
 - **SQL Server**: localhost:1434 (usuario: sa, password: TesorosChoco123!)
 - **Redis**: localhost:6379
-- **Swagger UI**: http://localhost:5000/swagger
+- **Swagger UI (Docker)**: http://localhost:5002/swagger
 
 ### Instalación Automática
 
@@ -69,7 +69,8 @@ dotnet run --project TesorosChoco.API
 ```
 
 4. **Accede a Swagger:**
-- URL: https://localhost:5001
+- URL (desarrollo local): https://localhost:5001
+- URL (Docker): http://localhost:5002
 - La documentación de la API estará disponible en la raíz
 
 ## 🏗️ Arquitectura
@@ -209,8 +210,13 @@ Los logs se almacenan en:
 3. Compilar: `dotnet build`
 
 ### Puerto ocupado:
+**Para desarrollo local (puerto 5001):**
 1. Cambiar el puerto en `launchSettings.json`
 2. O terminar el proceso que usa el puerto 5001
+
+**Para Docker (puerto 5002):**
+1. Cambiar el puerto en `docker-compose.yml`
+2. O terminar el proceso que usa el puerto 5002
 
 ## 🤝 Contribución
 
