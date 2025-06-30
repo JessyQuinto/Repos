@@ -189,17 +189,6 @@ El equipo de Tesoros del Chocó";
         return await SendEmailAsync(email, subject, body);
     }
 
-    // Métodos adicionales para compatibilidad
-    public async Task<bool> SendEmailConfirmationAsync(string email, string firstName, string confirmationToken)
-    {
-        return await SendEmailConfirmationAsync(email, confirmationToken);
-    }
-
-    public async Task<bool> SendPasswordResetAsync(string email, string firstName, string resetToken)
-    {
-        return await SendPasswordResetAsync(email, resetToken);
-    }
-
     public async Task<bool> SendWelcomeEmailAsync(string email, string firstName)
     {
         var subject = "¡Bienvenido a Tesoros del Chocó!";

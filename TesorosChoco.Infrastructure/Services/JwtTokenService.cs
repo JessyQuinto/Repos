@@ -11,17 +11,8 @@ namespace TesorosChoco.Infrastructure.Services;
 /// <summary>
 /// JWT Token service for generating and validating authentication tokens
 /// Implements secure token generation with configurable expiration times
-/// Consolidates both IJwtTokenService and ITokenService interfaces
 /// </summary>
-public interface IJwtTokenService
-{
-    string GenerateAccessToken(int userId, string email, IList<string> roles);
-    string GenerateRefreshToken();
-    ClaimsPrincipal? GetPrincipalFromExpiredToken(string token);
-    bool ValidateToken(string token);
-}
-
-public class JwtTokenService : IJwtTokenService, ITokenService
+public class JwtTokenService : ITokenService
 {
     private readonly IConfiguration _configuration;
     private readonly string _secretKey;

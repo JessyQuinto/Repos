@@ -118,9 +118,7 @@ public static class DependencyInjection
         }
         
         // Infrastructure Services
-        services.AddScoped<JwtTokenService>(); // Register concrete class
-        services.AddScoped<IJwtTokenService>(provider => provider.GetRequiredService<JwtTokenService>());
-        services.AddScoped<ITokenService>(provider => provider.GetRequiredService<JwtTokenService>());
+        services.AddScoped<ITokenService, JwtTokenService>();
         services.AddScoped<IRefreshTokenService, RefreshTokenService>();
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IPasswordService, PasswordService>();

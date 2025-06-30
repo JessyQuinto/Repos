@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.Extensions.Logging;
 using TesorosChoco.Application.DTOs;
 using TesorosChoco.Application.DTOs.Requests;
 using TesorosChoco.Application.DTOs.Responses;
@@ -18,18 +19,25 @@ public class AuthService : IAuthService
     private readonly ITokenService _tokenService;
     private readonly IRefreshTokenService _refreshTokenService;
     private readonly IPasswordService _passwordService;
+    private readonly IEmailService _emailService;
+    private readonly ILogger<AuthService> _logger;
     private readonly IMapper _mapper;
 
     public AuthService(
         IUserRepository userRepository,
         ITokenService tokenService,
         IRefreshTokenService refreshTokenService,
-        IPasswordService passwordService,        IMapper mapper)
+        IPasswordService passwordService,
+        IEmailService emailService,
+        ILogger<AuthService> logger,
+        IMapper mapper)
     {
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
         _refreshTokenService = refreshTokenService ?? throw new ArgumentNullException(nameof(refreshTokenService));
         _passwordService = passwordService ?? throw new ArgumentNullException(nameof(passwordService));
+        _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
     }
 
@@ -236,9 +244,17 @@ public class AuthService : IAuthService
             // Generate a simple reset token (in production, use a more secure approach)
             var resetToken = GeneratePasswordResetToken(user.Email, user.Id);
 
-            // TODO: Send email with reset link containing the token
-            // For now, just log the token (NEVER do this in production!)
-            System.Console.WriteLine($"Password reset token for {user.Email}: {resetToken}");
+            // Send password reset email
+            try
+            {
+                await _emailService.SendPasswordResetAsync(user.Email, resetToken);
+                _logger.LogInformation("Password reset email sent to {Email}", user.Email);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send password reset email to {Email}", user.Email);
+                // Don't throw - we still want to return success for security reasons
+            }
 
             return new GenericResponse
             {
