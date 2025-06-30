@@ -110,45 +110,5 @@ public class CategoriesController : BaseController
             _logger.LogError(ex, "Error getting products for category {CategoryId}", categoryId);
             return StatusCode(500, ApiResponse.ErrorResponse("An error occurred while getting products for the category"));
         }
-    }    // Rutas de compatibilidad con documentación API
-    
-    /// <summary>
-    /// Obtiene todas las categorías de productos (compatibilidad con documentación API)
-    /// </summary>
-    /// <returns>Lista de categorías</returns>
-    [HttpGet("/api/categories")]
-    [ProducesResponseType(typeof(ApiResponse<IEnumerable<CategoryDto>>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<IEnumerable<CategoryDto>>>> GetCategoriesDocumentation()
-    {
-        return await GetCategories();
-    }
-
-    /// <summary>
-    /// Obtiene una categoría específica por su ID (compatibilidad con documentación API)
-    /// </summary>
-    /// <param name="id">ID de la categoría</param>
-    /// <returns>Categoría específica</returns>
-    [HttpGet("/api/categories/{id}")]
-    [ProducesResponseType(typeof(ApiResponse<CategoryDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<CategoryDto>>> GetCategoryDocumentation(int id)
-    {
-        return await GetCategory(id);
-    }
-
-    /// <summary>
-    /// Obtiene productos de una categoría específica (compatibilidad con documentación API)
-    /// </summary>
-    /// <param name="categoryId">ID de la categoría</param>
-    /// <returns>Lista de productos de la categoría</returns>
-    [HttpGet("/api/categories/{categoryId}/products")]
-    [ProducesResponseType(typeof(ApiResponse<IEnumerable<ProductDto>>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<IEnumerable<ProductDto>>>> GetProductsByCategoryDocumentation(int categoryId)
-    {
-        return await GetProductsByCategory(categoryId);
     }
 }

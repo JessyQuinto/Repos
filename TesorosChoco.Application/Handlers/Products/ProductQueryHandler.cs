@@ -13,8 +13,7 @@ namespace TesorosChoco.Application.Handlers.Products;
 public class ProductQueryHandler : 
     IRequestHandler<GetAllProductsQuery, IEnumerable<ProductDto>>,
     IRequestHandler<GetProductByIdQuery, ProductDto?>,
-    IRequestHandler<GetProductBySlugQuery, ProductDto?>,
-    IRequestHandler<GetFeaturedProductsQuery, IEnumerable<ProductDto>>
+    IRequestHandler<GetProductBySlugQuery, ProductDto?>
 {
     private readonly IProductRepository _productRepository;
     private readonly IMapper _mapper;
@@ -124,25 +123,6 @@ public class ProductQueryHandler :
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving product with slug {ProductSlug}", request.Slug);
-            throw;
-        }
-    }
-
-    public async Task<IEnumerable<ProductDto>> Handle(GetFeaturedProductsQuery request, CancellationToken cancellationToken)
-    {
-        try
-        {
-            _logger.LogInformation("Getting featured products, count: {Count}", request.Count);
-            
-            var products = await _productRepository.GetFeaturedAsync(request.Count);
-            var result = _mapper.Map<IEnumerable<ProductDto>>(products);
-            
-            _logger.LogInformation("Retrieved {Count} featured products", result.Count());
-            return result;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving featured products");
             throw;
         }
     }

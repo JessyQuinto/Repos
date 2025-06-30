@@ -112,45 +112,5 @@ public class ProducersController : BaseController
             _logger.LogError(ex, "Error getting products for producer {ProducerId}", producerId);
             return StatusCode(500, ApiResponse.ErrorResponse("An error occurred while getting products for the producer"));
         }
-    }    // Rutas de compatibilidad con documentación API
-    
-    /// <summary>
-    /// Obtiene todos los productores/artesanos (compatibilidad con documentación API)
-    /// </summary>
-    /// <returns>Lista de productores</returns>
-    [HttpGet("/api/producers")]
-    [ProducesResponseType(typeof(ApiResponse<IEnumerable<ProducerDto>>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<IEnumerable<ProducerDto>>>> GetProducersDocumentation()
-    {
-        return await GetProducers();
-    }
-
-    /// <summary>
-    /// Obtiene un productor específico por su ID (compatibilidad con documentación API)
-    /// </summary>
-    /// <param name="id">ID del productor</param>
-    /// <returns>Productor específico</returns>
-    [HttpGet("/api/producers/{id}")]
-    [ProducesResponseType(typeof(ApiResponse<ProducerDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<ProducerDto>>> GetProducerDocumentation(int id)
-    {
-        return await GetProducer(id);
-    }
-
-    /// <summary>
-    /// Obtiene productos de un productor específico (compatibilidad con documentación API)
-    /// </summary>
-    /// <param name="producerId">ID del productor</param>
-    /// <returns>Lista de productos del productor</returns>
-    [HttpGet("/api/producers/{producerId}/products")]
-    [ProducesResponseType(typeof(ApiResponse<IEnumerable<ProductDto>>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<IEnumerable<ProductDto>>>> GetProductsByProducerDocumentation(int producerId)
-    {
-        return await GetProductsByProducer(producerId);
     }
 }

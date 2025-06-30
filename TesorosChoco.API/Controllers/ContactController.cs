@@ -49,18 +49,4 @@ public class ContactController : ControllerBase
             return StatusCode(500, ApiResponse.ErrorResponse("An error occurred while processing your request"));
         }
     }
-
-    /// <summary>
-    /// Envía un mensaje de contacto (compatibilidad con documentación API)
-    /// </summary>
-    /// <param name="request">Datos del mensaje de contacto</param>
-    /// <returns>Confirmación del envío</returns>
-    [HttpPost("/api/contact")]
-    [ProducesResponseType(typeof(ApiResponse<GenericResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<GenericResponse>>> SubmitContactFormDocumentation([FromBody] ContactRequest request)
-    {
-        return await SubmitContactForm(request);
-    }
 }

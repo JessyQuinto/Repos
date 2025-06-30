@@ -78,24 +78,6 @@ public class ProductRepository : BaseRepository<Product>, IProductRepository
         }
     }
 
-    public async Task<IEnumerable<Product>> GetFeaturedAsync(int count)
-    {
-        try
-        {
-            return await _dbSet
-                .Include(p => p.Category)
-                .Include(p => p.Producer)
-                .Where(p => p.Featured)
-                .OrderBy(p => p.Name)
-                .Take(count)
-                .ToListAsync();
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException($"Error retrieving {count} featured products", ex);
-        }
-    }
-
     public async Task<IEnumerable<Product>> GetByCategoryIdAsync(int categoryId)
     {
         try
@@ -127,91 +109,6 @@ public class ProductRepository : BaseRepository<Product>, IProductRepository
         catch (Exception ex)
         {
             throw new InvalidOperationException($"Error retrieving products by producer {producerId}", ex);
-        }
-    }
-
-    public async Task<(IEnumerable<Product> Products, int Total)> SearchAsync(
-        string? searchTerm = null, 
-        int? categoryId = null, 
-        int? producerId = null, 
-        decimal? minPrice = null, 
-        decimal? maxPrice = null, 
-        bool? featured = null, 
-        int page = 1, 
-        int limit = 10, 
-        string sortBy = "name", 
-        string sortOrder = "asc")
-    {
-        try
-        {
-            var query = _dbSet
-                .Include(p => p.Category)
-                .Include(p => p.Producer)
-                .AsQueryable();
-
-            // Apply filters
-            if (!string.IsNullOrWhiteSpace(searchTerm))
-            {
-                query = query.Where(p => p.Name.Contains(searchTerm) || 
-                                        p.Description.Contains(searchTerm));
-            }
-
-            if (categoryId.HasValue)
-            {
-                query = query.Where(p => p.CategoryId == categoryId.Value);
-            }
-
-            if (producerId.HasValue)
-            {
-                query = query.Where(p => p.ProducerId == producerId.Value);
-            }
-
-            if (minPrice.HasValue)
-            {
-                query = query.Where(p => p.CurrentPrice >= minPrice.Value);
-            }
-
-            if (maxPrice.HasValue)
-            {
-                query = query.Where(p => p.CurrentPrice <= maxPrice.Value);
-            }
-
-            if (featured.HasValue)
-            {
-                query = query.Where(p => p.Featured == featured.Value);
-            }
-
-            // Get total count before pagination
-            var total = await query.CountAsync();
-
-            // Apply sorting
-            query = sortBy.ToLower() switch
-            {
-                "price" => sortOrder.ToLower() == "desc" 
-                    ? query.OrderByDescending(p => p.CurrentPrice)
-                    : query.OrderBy(p => p.CurrentPrice),
-                "created" => sortOrder.ToLower() == "desc"
-                    ? query.OrderByDescending(p => p.CreatedAt)
-                    : query.OrderBy(p => p.CreatedAt),
-                "rating" => sortOrder.ToLower() == "desc"
-                    ? query.OrderByDescending(p => p.Rating)
-                    : query.OrderBy(p => p.Rating),
-                _ => sortOrder.ToLower() == "desc"
-                    ? query.OrderByDescending(p => p.Name)
-                    : query.OrderBy(p => p.Name)
-            };
-
-            // Apply pagination
-            var products = await query
-                .Skip((page - 1) * limit)
-                .Take(limit)
-                .ToListAsync();
-
-            return (products, total);
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException("Error searching products", ex);
         }
     }
 

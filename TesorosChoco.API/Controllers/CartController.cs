@@ -384,47 +384,5 @@ public class CartController : BaseController
             return StatusCode(StatusCodes.Status500InternalServerError, 
                 ApiResponse.ErrorResponse("An error occurred while validating stock"));
         }
-    }    /// <summary>
-    /// Obtiene el ID del usuario actual desde el token JWT
-    /// </summary>    // Rutas de compatibilidad con documentación API    
-    /// <summary>
-    /// Obtiene el carrito del usuario autenticado (compatibilidad con documentación API)
-    /// </summary>
-    /// <returns>Carrito del usuario</returns>
-    [HttpGet("/api/cart")]
-    [ProducesResponseType(typeof(ApiResponse<CartDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<CartDto>>> GetCartDocumentation()
-    {
-        return await GetCart();
-    }
-
-    /// <summary>
-    /// Actualiza el carrito del usuario (compatibilidad con documentación API)
-    /// </summary>
-    /// <param name="request">Items del carrito a actualizar</param>
-    /// <returns>Carrito actualizado</returns>
-    [HttpPost("/api/cart")]
-    [ProducesResponseType(typeof(CartDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<CartDto>> UpdateCartDocumentation([FromBody] UpdateCartRequest request)
-    {
-        return await UpdateCart(request);
-    }
-
-    /// <summary>
-    /// Vacía completamente el carrito del usuario (compatibilidad con documentación API)
-    /// </summary>
-    /// <returns>No content</returns>
-    [HttpDelete("/api/cart")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> ClearCartDocumentation()
-    {
-        return await ClearCart();
     }
 }

@@ -103,41 +103,4 @@ public class UsersController : BaseController
             _logger.LogError(ex, "Error updating user profile for ID {UserId}", id);            return StatusCode(500, ApiResponse.ErrorResponse("An error occurred while updating user profile"));
         }
     }
-
-    // Rutas de compatibilidad con documentación API
-    
-    /// <summary>
-    /// Obtiene el perfil de un usuario específico (compatibilidad con documentación API)    /// </summary>
-    /// <param name="id">ID del usuario</param>
-    /// <returns>Perfil del usuario</returns>
-    [HttpGet("/api/users/{id}")]
-    [Authorize]
-    [ProducesResponseType(typeof(ApiResponse<UserDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<UserDto>>> GetUserProfileDocumentation(int id)
-    {
-        return await GetUserProfile(id);
-    }
-
-    /// <summary>
-    /// Actualiza el perfil de un usuario (compatibilidad con documentación API)
-    /// </summary>
-    /// <param name="id">ID del usuario</param>
-    /// <param name="request">Datos a actualizar</param>
-    /// <returns>Perfil actualizado del usuario</returns>
-    [HttpPut("/api/users/{id}")]
-    [Authorize]
-    [ProducesResponseType(typeof(ApiResponse<UserDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<UserDto>>> UpdateUserProfileDocumentation(int id, [FromBody] UpdateProfileRequest request)
-    {
-        return await UpdateUserProfile(id, request);
-    }
 }

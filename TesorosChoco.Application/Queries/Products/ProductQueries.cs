@@ -22,11 +22,6 @@ public record GetAllProductsQuery : IRequest<IEnumerable<ProductDto>>
 public record GetProductByIdQuery(int Id) : IRequest<ProductDto?>;
 
 /// <summary>
-/// Query to get featured products
-/// </summary>
-public record GetFeaturedProductsQuery(int Count = 10) : IRequest<IEnumerable<ProductDto>>;
-
-/// <summary>
 /// Query to get a product by slug
 /// </summary>
 public record GetProductBySlugQuery(string Slug) : IRequest<ProductDto?>;

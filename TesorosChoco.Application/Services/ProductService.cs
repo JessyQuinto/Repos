@@ -153,17 +153,15 @@ public class ProductService : IProductService
         try
         {
             // Convert parameters to repository method parameters
-            var (products, total) = await _productRepository.SearchAsync(
+            var (products, total) = await _productRepository.SearchProductsAsync(
                 searchTerm: parameters.Q,
                 categoryId: parameters.Category,
-                producerId: parameters.Producer,
                 minPrice: parameters.MinPrice,
                 maxPrice: parameters.MaxPrice,
+                producerId: parameters.Producer,
                 featured: parameters.Featured,
-                page: (parameters.Offset / parameters.Limit) + 1,
                 limit: parameters.Limit,
-                sortBy: "name",
-                sortOrder: "asc"
+                offset: parameters.Offset
             );
 
             var productDtos = _mapper.Map<List<ProductDto>>(products);

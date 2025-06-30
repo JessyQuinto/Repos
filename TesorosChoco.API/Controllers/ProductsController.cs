@@ -271,33 +271,6 @@ public class ProductsController : ControllerBase
     }
 
     /// <summary>
-    /// Obtiene productos destacados
-    /// </summary>
-    /// <param name="count">Número de productos a obtener (por defecto 10)</param>
-    /// <returns>Lista de productos destacados</returns>
-    [HttpGet("featured")]
-    [ProducesResponseType(typeof(IEnumerable<ProductDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<ProductDto>>> GetFeaturedProducts([FromQuery] int count = 10)
-    {
-        try
-        {
-            var query = new GetFeaturedProductsQuery(Math.Min(count, 50)); // Limit count
-            var products = await _mediator.Send(query);
-            
-            return Ok(products);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting featured products");
-            return StatusCode(500, new { 
-                error = "Internal server error", 
-                message = "An error occurred while getting featured products" 
-            });
-        }
-    }
-
-    /// <summary>
     /// Busca productos con filtros específicos
     /// </summary>
     /// <param name="q">Término de búsqueda</param>
