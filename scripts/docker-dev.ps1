@@ -20,7 +20,7 @@ switch ($Action) {
     "up" {
         Write-Info "Iniciando servicios de TesorosChoco..."
         docker-compose up -d
-        Write-Info "Servicios iniciados. API disponible en: http://localhost:5000"
+        Write-Info "Servicios iniciados. API disponible en: http://localhost:5003"
         Write-Info "SQL Server disponible en: localhost:1434"
         Write-Info "Redis disponible en: localhost:6379"
     }
