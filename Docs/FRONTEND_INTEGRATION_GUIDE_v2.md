@@ -10,7 +10,54 @@ Este documento tiene como finalidad guiar la integración entre el backend y el 
 - **URL Base (Docker)**: `http://localhost:5002`
 - **Versionado API**: `api/v1/`
 - **Content-Type**: `application/json`
-- **Autenticación**: JWT Bearer Token
+- **Autenticación**: JWT Bearer## 🚀 Funcionalidades Faltantes por Implementar
+
+### 📋 **Funcionalidades Críticas del Flujo Básico**
+
+Después de analizar el código, identifiqué las siguientes funcionalidades **esenciales** que faltan para completar el flujo básico de un e-commerce:
+
+#### **🔐 Sistema de Confirmación de Email**
+- `POST /api/v1/auth/confirm-email` - Confirmar email de usuario
+- `POST /api/v1/auth/resend-confirmation` - Reenviar email de confirmación
+- **Impacto**: Los usuarios se registran pero no pueden confirmar su email
+- **Estado actual**: Servicio implementado pero **sin endpoints expuestos**
+
+#### **📧 Notificaciones de Orden**
+- **Email de confirmación de orden** al completar checkout
+- **Email de cambio de estado** cuando admin actualiza estado
+- **Impacto**: Los usuarios no reciben confirmación de sus pedidos
+- **Estado actual**: Servicio de email implementado pero **no se usa en el flujo**
+
+#### **💳 Procesamiento de Pagos**
+- **Validación de métodos de pago**
+- **Integración con pasarelas** (aunque sea simulada)
+- **Estado de pago en órdenes**
+- **Impacto**: Las órdenes se crean como "Pending" pero no hay proceso de pago
+- **Estado actual**: Solo se guarda el método, **no hay procesamiento**
+
+#### **🔄 Estados de Orden Automáticos**
+- **Transiciones de estado automatizadas**
+- **Validaciones de cambio de estado**
+- **Triggers de notificaciones por estado**
+- **Impacto**: Estados se cambian manualmente sin lógica de negocio
+- **Estado actual**: Solo cambio manual por admin
+
+#### **📱 Proceso Completo de Checkout**
+**Lo que falta después del checkout:**
+1. ✅ Crear orden ← **Implementado**
+2. ❌ Procesar pago ← **Falta**
+3. ❌ Enviar email de confirmación ← **Falta**
+4. ❌ Actualizar estado a "Processing" ← **Falta**
+5. ❌ Liberar stock reservado ← **Parcialmente implementado**
+
+---
+
+### 🎯 **Prioridades para Demo Funcional:**
+
+1. **🔐 Confirmación de email** (crítico para flujo de usuario)
+2. **📧 Emails de confirmación de orden** (esencial para e-commerce)
+3. **💳 Simulación básica de pago** (completar checkout)
+4. **🔄 Estados automáticos de orden** (mejorar experiencia admin)ken
 - **Documentación**: Swagger UI disponible en `/swagger`
 
 ---
@@ -672,20 +719,50 @@ const renewToken = async (refreshToken, userId) => {
 
 ---
 
-## 🚀 Funcionalidades Futuras
+## � Funcionalidades de Administración Implementadas
 
-Este documento puede expandirse para incluir:
+### **Panel de Administración - Gestión de Productos** 🔒
 
-### 📋 Próximas Etapas
-- **❤️ Wishlist**: Productos favoritos
-- **⭐ Reseñas de productos**: Sistema de calificaciones
-- **🔧 Panel de administración**: Gestión de productos, órdenes y usuarios
-- **📧 Notificaciones**: Email y push notifications
-- **💳 Pasarelas de pago**: Integración con Stripe, PayU, etc.
-- **📊 Reportes y estadísticas**: Dashboard analítico
-- **🎯 Sistema de descuentos y cupones**
-- **📦 Tracking de envíos**
-- **💬 Chat de soporte**
+#### **Endpoint**: `POST /api/v1/products`
+**Descripción**: Crear un nuevo producto (solo administradores).
+
+#### **Endpoint**: `PUT /api/v1/products/{id}`
+**Descripción**: Actualizar un producto existente (solo administradores).
+
+#### **Endpoint**: `DELETE /api/v1/products/{id}`
+**Descripción**: Eliminar un producto (solo administradores).
+
+### **Panel de Administración - Gestión de Órdenes** 🔒
+
+#### **Endpoint**: `GET /api/v1/orders/user/{userId}`
+**Descripción**: Obtener todas las órdenes de un usuario específico (solo administradores).
+
+#### **Endpoint**: `PUT /api/v1/orders/{id}/status`
+**Descripción**: Actualizar el estado de una orden (solo administradores).
+
+**Body esperado**:
+```json
+{
+  "status": "Processing"
+}
+```
+
+**Estados válidos**: `Pending`, `Processing`, `Shipped`, `Delivered`, `Cancelled`, `Refunded`
+
+### **Gestión de Inventario**
+
+El sistema cuenta con un avanzado sistema de gestión de inventario que incluye:
+
+#### **Reservas de Stock**
+- **Endpoint**: `POST /api/v1/cart/reserve-stock` - Reservar stock del carrito
+- **Endpoint**: `POST /api/v1/cart/release-reservations` - Liberar reservas
+- **Endpoint**: `GET /api/v1/cart/validate-stock` - Validar disponibilidad
+
+#### **Características del Sistema de Inventario**:
+- ✅ **Reservas temporales**: Stock se reserva durante el proceso de checkout (15 minutos por defecto)
+- ✅ **Limpieza automática**: Las reservas expiradas se limpian automáticamente cada 5 minutos
+- ✅ **Validación en tiempo real**: Verificación de stock disponible considerando reservas activas
+- ✅ **Confirmación de reservas**: Al completar la orden, las reservas se confirman y el stock se reduce definitivamente
 
 ### 🌟 Endpoints Adicionales Disponibles
 - `GET /api/v1/categories`: Lista de categorías
@@ -693,6 +770,111 @@ Este documento puede expandirse para incluir:
 - `POST /api/v1/contact`: Formulario de contacto
 - `POST /api/v1/newsletter`: Suscripción al newsletter
 - `GET /api/v1/health`: Health check del sistema
+
+---
+
+## � Funcionalidades Faltantes por Implementar
+
+### 📋 **Funcionalidades Críticas Faltantes**
+
+#### **❤️ Sistema de Wishlist/Favoritos**
+- `POST /api/v1/wishlist` - Agregar producto a favoritos
+- `GET /api/v1/wishlist` - Obtener lista de favoritos del usuario
+- `DELETE /api/v1/wishlist/{productId}` - Remover de favoritos
+- **Impacto**: Alta retención de usuarios y mejora experiencia de compra
+
+#### **⭐ Sistema de Reseñas y Calificaciones**
+- `POST /api/v1/products/{id}/reviews` - Crear reseña
+- `GET /api/v1/products/{id}/reviews` - Obtener reseñas de un producto
+- `PUT /api/v1/reviews/{id}` - Actualizar reseña propia
+- `DELETE /api/v1/reviews/{id}` - Eliminar reseña propia
+- **Impacto**: Incrementa confianza y ayuda en decisión de compra
+
+#### **� Dashboard de Administración Completo**
+- `GET /api/v1/admin/dashboard/stats` - Estadísticas generales
+- `GET /api/v1/admin/sales/reports` - Reportes de ventas
+- `GET /api/v1/admin/products/analytics` - Analytics de productos
+- `GET /api/v1/admin/users/stats` - Estadísticas de usuarios
+- **Funcionalidades específicas**:
+  - � Gráficos de ventas por período
+  - 🏆 Productos más vendidos
+  - 👥 Análisis de comportamiento de usuarios
+  - 💰 Reportes financieros
+
+#### **� Sistema de Descuentos y Cupones**
+- `POST /api/v1/coupons` - Crear cupón (admin)
+- `GET /api/v1/coupons/{code}/validate` - Validar cupón
+- `POST /api/v1/cart/apply-coupon` - Aplicar cupón al carrito
+- `DELETE /api/v1/cart/remove-coupon` - Remover cupón del carrito
+- **Tipos de descuentos**: Porcentaje, monto fijo, envío gratis, primera compra
+
+#### **📦 Sistema de Tracking de Envíos**
+- `POST /api/v1/orders/{id}/tracking` - Agregar información de tracking
+- `GET /api/v1/orders/{id}/tracking` - Obtener estado del envío
+- `PUT /api/v1/orders/{id}/tracking` - Actualizar estado del envío
+- **Estados de envío**: En preparación, Enviado, En tránsito, Entregado
+
+#### **📧 Sistema de Notificaciones**
+- `GET /api/v1/notifications` - Obtener notificaciones del usuario
+- `PUT /api/v1/notifications/{id}/read` - Marcar como leída
+- `POST /api/v1/notifications/preferences` - Configurar preferencias
+- **Tipos**: Email, push notifications, SMS, notificaciones in-app
+
+### 🔧 **Funcionalidades de Mejora**
+
+#### **🔍 Búsqueda Avanzada**
+- Filtros por rango de precios
+- Filtros por calificaciones
+- Filtros por disponibilidad
+- Ordenamiento avanzado (popularidad, fecha, rating)
+
+#### **📱 API para Aplicación Móvil**
+- Endpoints optimizados para móvil
+- Compresión de imágenes
+- Paginación optimizada
+- Caché agresivo
+
+#### **💳 Pasarelas de Pago**
+- Integración con Stripe
+- Integración con PayU
+- Integración con Mercado Pago
+- Procesamiento seguro de pagos
+
+#### **🌍 Funcionalidades Avanzadas**
+- **Geolocalización**: Cálculo automático de costos de envío
+- **Multi-idioma**: Soporte para español e inglés
+- **Multi-moneda**: Soporte para COP, USD, EUR
+- **Chat en vivo**: Sistema de soporte al cliente
+
+---
+
+## 📊 **Recomendación: Administración de Productos**
+
+### **¿Desde dónde administrar los productos?**
+
+**✅ RECOMENDACIÓN: Administración desde el Backend**
+
+#### **Ventajas de administrar desde el backend:**
+1. **🔐 Seguridad**: Control total de acceso y validaciones
+2. **📊 Auditoría**: Registro completo de cambios y responsables  
+3. **🔄 Sincronización**: Inventario siempre actualizado en tiempo real
+4. **⚡ Performance**: Procesamiento optimizado en servidor
+5. **📋 Validaciones**: Reglas de negocio centralizadas
+
+#### **Flujo recomendado:**
+1. **Panel de Admin Web**: Para gestión diaria por administradores
+2. **API Backend**: Para operaciones programáticas y integraciones
+3. **Frontend de Usuario**: Solo lectura y compras
+
+#### **Endpoints ya implementados para administración:**
+- ✅ `POST /api/v1/products` - Crear producto
+- ✅ `PUT /api/v1/products/{id}` - Actualizar producto  
+- ✅ `DELETE /api/v1/products/{id}` - Eliminar producto
+- ✅ Control de stock automatizado
+- ✅ Gestión de estados de órdenes
+- ✅ Sistema de reservas de inventario
+
+**El sistema actual ya tiene una base sólida para administración desde el backend. Solo falta implementar las funcionalidades adicionales listadas arriba.**
 
 ---
 

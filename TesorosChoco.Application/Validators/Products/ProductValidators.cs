@@ -19,6 +19,7 @@ public class CreateProductCommandValidator : AbstractValidator<CreateProductComm
         this.AddProducerValidation(x => x.Request.ProducerId);
         this.AddStockValidation(x => x.Request.Stock);
         this.AddImageValidation(x => x.Request.Image);
+        this.AddStatusValidation(x => x.Request.Status);
     }
 }
 
@@ -41,6 +42,7 @@ public class UpdateProductCommandValidator : AbstractValidator<UpdateProductComm
         this.AddProducerValidation(x => x.Request.ProducerId);
         this.AddStockValidation(x => x.Request.Stock);
         this.AddImageValidation(x => x.Request.Image);
+        this.AddStatusValidation(x => x.Request.Status);
     }
 }
 

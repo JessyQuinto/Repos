@@ -1,3 +1,5 @@
+using TesorosChoco.Domain.Enums;
+
 namespace TesorosChoco.Application.DTOs;
 
 public class ProductDto
@@ -15,6 +17,13 @@ public class ProductDto
     public int Stock { get; set; }
     public bool Featured { get; set; }
     public double? Rating { get; set; }
+    public ProductStatus Status { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+    
+    // Computed Properties para el Frontend
+    public decimal CurrentPrice => DiscountedPrice ?? Price;
+    public bool HasDiscount => DiscountedPrice.HasValue && DiscountedPrice < Price;
+    public bool IsInStock => Stock > 0;
+    public bool IsAvailableForPurchase => Status == ProductStatus.Active && IsInStock;
 }

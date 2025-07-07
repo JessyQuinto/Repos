@@ -1,3 +1,5 @@
+using TesorosChoco.Domain.Enums;
+
 namespace TesorosChoco.Application.DTOs.Requests;
 
 public class CreateProductRequest
@@ -13,6 +15,7 @@ public class CreateProductRequest
     public int ProducerId { get; set; }
     public int Stock { get; set; }
     public bool Featured { get; set; }
+    public ProductStatus Status { get; set; } = ProductStatus.Draft; // Agregar estado
 }
 
 public class UpdateProductRequest
@@ -29,4 +32,5 @@ public class UpdateProductRequest
     public int ProducerId { get; set; }
     public int Stock { get; set; }
     public bool Featured { get; set; }
+    public ProductStatus Status { get; set; } = ProductStatus.Active; // Agregar estado
 }

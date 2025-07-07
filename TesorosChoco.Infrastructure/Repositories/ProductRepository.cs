@@ -52,6 +52,7 @@ public class ProductRepository : BaseRepository<Product>, IProductRepository
             return await _dbSet
                 .Include(p => p.Category)
                 .Include(p => p.Producer)
+                .Where(p => p.Status == Domain.Enums.ProductStatus.Active) // Solo productos activos
                 .OrderBy(p => p.Name)
                 .ToListAsync();
         }
@@ -68,7 +69,7 @@ public class ProductRepository : BaseRepository<Product>, IProductRepository
             return await _dbSet
                 .Include(p => p.Category)
                 .Include(p => p.Producer)
-                .Where(p => p.Featured)
+                .Where(p => p.Featured && p.Status == Domain.Enums.ProductStatus.Active) // Solo activos y destacados
                 .OrderBy(p => p.Name)
                 .ToListAsync();
         }

@@ -1,5 +1,6 @@
 using FluentValidation;
 using System.Linq.Expressions;
+using TesorosChoco.Domain.Enums;
 
 namespace TesorosChoco.Application.Validators.Products;
 
@@ -64,5 +65,12 @@ public static class ProductValidationRules
     {
         validator.RuleFor(imageSelector)
             .NotEmpty().WithMessage("Main product image is required");
+    }
+
+    public static void AddStatusValidation<T>(this AbstractValidator<T> validator, Expression<Func<T, ProductStatus>> statusSelector)
+    {
+        validator.RuleFor(statusSelector)
+            .IsInEnum().WithMessage("Invalid product status")
+            .NotEqual(ProductStatus.OutOfStock).WithMessage("Product status cannot be set to OutOfStock manually");
     }
 }

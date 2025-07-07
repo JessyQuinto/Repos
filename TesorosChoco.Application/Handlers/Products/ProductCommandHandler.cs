@@ -18,15 +18,21 @@ public class ProductCommandHandler :
     IRequestHandler<UpdateProductStockCommand, bool>
 {
     private readonly IProductRepository _productRepository;
+    private readonly ICategoryRepository _categoryRepository;
+    private readonly IProducerRepository _producerRepository;
     private readonly IMapper _mapper;
     private readonly ILogger<ProductCommandHandler> _logger;
 
     public ProductCommandHandler(
         IProductRepository productRepository,
+        ICategoryRepository categoryRepository,
+        IProducerRepository producerRepository,
         IMapper mapper,
         ILogger<ProductCommandHandler> logger)
     {
         _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository));
+        _categoryRepository = categoryRepository ?? throw new ArgumentNullException(nameof(categoryRepository));
+        _producerRepository = producerRepository ?? throw new ArgumentNullException(nameof(producerRepository));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
@@ -42,6 +48,20 @@ public class ProductCommandHandler :
             if (existingProduct != null)
             {
                 throw new InvalidOperationException($"Product with slug '{request.Request.Slug}' already exists");
+            }
+
+            // Validate CategoryId exists
+            var category = await _categoryRepository.GetByIdAsync(request.Request.CategoryId);
+            if (category == null)
+            {
+                throw new InvalidOperationException($"Category with ID {request.Request.CategoryId} does not exist");
+            }
+
+            // Validate ProducerId exists
+            var producer = await _producerRepository.GetByIdAsync(request.Request.ProducerId);
+            if (producer == null)
+            {
+                throw new InvalidOperationException($"Producer with ID {request.Request.ProducerId} does not exist");
             }
 
             var product = _mapper.Map<Product>(request.Request);

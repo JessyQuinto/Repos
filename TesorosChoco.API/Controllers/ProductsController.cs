@@ -368,4 +368,97 @@ public class ProductsController : ControllerBase
             });
         }
     }
+
+    /// <summary>
+    /// Cambia el estado de un producto (solo admins)
+    /// </summary>
+    /// <param name="id">ID del producto</param>
+    /// <param name="status">Nuevo estado</param>
+    /// <returns>Producto actualizado</returns>
+    [HttpPatch("{id}/status")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(ProductDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ProductDto>> ChangeProductStatus(int id, [FromBody] ProductStatus status)
+    {
+        try
+        {
+            var command = new ChangeProductStatusCommand(id, status);
+            var product = await _mediator.Send(command);
+            
+            if (product == null)
+            {
+                return NotFound(new { error = "Product not found" });
+            }
+            
+            _logger.LogInformation("Product status changed: {ProductId} -> {Status}", id, status);
+            return Ok(product);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error changing product status: {ProductId}", id);
+            return StatusCode(500, new { error = "Internal server error" });
+        }
+    }
+
+    /// <summary>
+    /// Obtiene todos los productos (incluyendo inactivos) - Solo admins
+    /// </summary>
+    [HttpGet("admin/all")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(IEnumerable<ProductDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IEnumerable<ProductDto>>> GetAllProductsForAdmin(
+        [FromQuery] ProductStatus? status = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        try
+        {
+            var query = new GetAllProductsForAdminQuery
+            {
+                Status = status,
+                Page = page,
+                PageSize = Math.Min(pageSize, 100)
+            };
+            
+            var products = await _mediator.Send(query);
+            return Ok(products);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting all products for admin");
+            return StatusCode(500, new { error = "Internal server error" });
+        }
+    }
+
+    /// <summary>
+    /// Actualiza solo el stock de un producto
+    /// </summary>
+    [HttpPatch("{id}/stock")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> UpdateProductStock(int id, [FromBody] int newStock)
+    {
+        try
+        {
+            var command = new UpdateProductStockCommand(id, newStock);
+            var success = await _mediator.Send(command);
+            
+            if (!success)
+            {
+                return NotFound(new { error = "Product not found" });
+            }
+            
+            return Ok(new { message = "Stock updated successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating product stock: {ProductId}", id);
+            return StatusCode(500, new { error = "Internal server error" });
+        }
+    }
 }

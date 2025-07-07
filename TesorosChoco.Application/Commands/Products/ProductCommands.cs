@@ -1,6 +1,7 @@
 using MediatR;
 using TesorosChoco.Application.DTOs;
 using TesorosChoco.Application.DTOs.Requests;
+using TesorosChoco.Domain.Enums;
 
 namespace TesorosChoco.Application.Commands.Products;
 
@@ -23,3 +24,18 @@ public record DeleteProductCommand(int Id) : IRequest<bool>;
 /// Command to update product stock
 /// </summary>
 public record UpdateProductStockCommand(int ProductId, int NewStock) : IRequest<bool>;
+
+/// <summary>
+/// Command to change product status
+/// </summary>
+public record ChangeProductStatusCommand(int ProductId, ProductStatus Status) : IRequest<ProductDto?>;
+
+/// <summary>
+/// Query to get all products for admin (including inactive)
+/// </summary>
+public record GetAllProductsForAdminQuery : IRequest<IEnumerable<ProductDto>>
+{
+    public ProductStatus? Status { get; init; }
+    public int Page { get; init; } = 1;
+    public int PageSize { get; init; } = 10;
+}
